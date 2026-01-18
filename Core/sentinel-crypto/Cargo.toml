@@ -1,0 +1,9 @@
+[package]
+name = "sentinel-crypto"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+tracing.workspace = true
+# Placeholder for ed25519-dalek or similar

@@ -1,0 +1,12 @@
+[package]
+name = "sentinel-parser"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+tree-sitter.workspace = true
+tracing.workspace = true
+# Language grammars (will be added as needed)
+tree-sitter-typescript = "0.20"
+tree-sitter-python = "0.20"

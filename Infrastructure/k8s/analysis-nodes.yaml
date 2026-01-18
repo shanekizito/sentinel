@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentinel-analysis-node
+  labels:
+    component: analysis
+spec:
+  replicas: 100
+  selector:
+    matchLabels:
+      component: analysis
+  template:
+    metadata:
+      labels:
+        component: analysis
+    spec:
+      containers:
+      - name: sentinel-core
+        image: sentinel/core:latest
+        resources:
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+          limits:
+            cpu: "8"
+            memory: "16Gi"
+        env:
+        - name: RUST_LOG
+          value: "info"
+        - name: KAFKA_BROKERS
+          value: "kafka-redpanda:9092"
+        volumeMounts:
+        - name: tmp-ramdisk
+          mountPath: /dev/shm
+      volumes:
+      - name: tmp-ramdisk
+        emptyDir:
+          medium: Memory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentinel-analysis-mesh
+spec:
+  clusterIP: None
+  selector:
+    component: analysis
+  ports:
+  - port: 50051
+    targetPort: 50051

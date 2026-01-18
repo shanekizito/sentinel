@@ -1,0 +1,10 @@
+[package]
+name = "sentinel-formal"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+tracing.workspace = true
+sentinel-cpg = { path = "../sentinel-cpg" }
+# Placeholder for Z3 binding if needed, otherwise we generate SMT-LIB

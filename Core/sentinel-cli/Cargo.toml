@@ -1,0 +1,20 @@
+[package]
+name = "sentinel-cli"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+sentinel-parser = { path = "../sentinel-parser" }
+sentinel-cpg = { path = "../sentinel-cpg" }
+sentinel-rules = { path = "../sentinel-rules" }
+sentinel-formal = { path = "../sentinel-formal" }
+sentinel-symbolic = { path = "../sentinel-symbolic" }
+sentinel-cloud = { path = "../sentinel-cloud" }
+sentinel-ai = { path = "../sentinel-ai" }
+sentinel-orchestrator = { path = "../sentinel-orchestrator" }
+sentinel-crypto = { path = "../sentinel-crypto" }
+sentinel-reflex = { path = "../sentinel-reflex" }

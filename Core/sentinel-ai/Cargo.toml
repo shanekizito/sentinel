@@ -1,0 +1,10 @@
+[package]
+name = "sentinel-ai"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+tracing.workspace = true
+# Integration with C-API or Python bridge
+ndarray = "0.15"

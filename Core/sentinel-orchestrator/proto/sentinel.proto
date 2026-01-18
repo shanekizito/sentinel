@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package sentinel.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// The core management service for the planetary analysis mesh.
+service OrchestratorService {
+  // Registers an analysis node into the mesh.
+  rpc RegisterNode(RegisterNodeRequest) returns (RegisterNodeResponse);
+
+  // Submits a repository for planetary-scale analysis.
+  rpc SubmitScan(SubmitScanRequest) returns (SubmitScanResponse);
+
+  // Streams real-time telemetry from an active scan node.
+  rpc StreamTelemetry(StreamTelemetryRequest) returns (stream TelemetryUpdate);
+}
+
+message RegisterNodeRequest {
+  string node_id = 1;
+  string region = 2;
+  string capabilities = 3; // JSON or bitmask
+  bytes public_key_pqc = 4;
+}
+
+message RegisterNodeResponse {
+  bool success = 1;
+  string assignment_token = 2;
+}
+
+message SubmitScanRequest {
+  string repo_url = 1;
+  string tenant_id = 2;
+  repeated string analysis_phases = 3; // ["taint", "formal", "symbolic"]
+}
+
+message SubmitScanResponse {
+  string job_id = 1;
+  google.protobuf.Timestamp estimated_completion = 2;
+}
+
+message StreamTelemetryRequest {
+  string job_id = 1;
+}
+
+message TelemetryUpdate {
+  string job_id = 1;
+  float progress = 2;
+  string current_file = 3;
+  uint32 vulnerabilities_found = 4;
+}

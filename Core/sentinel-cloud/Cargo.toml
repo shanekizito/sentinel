@@ -1,0 +1,10 @@
+[package]
+name = "sentinel-cloud"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+tracing.workspace = true
+# Mocking heavy cloud deps
+tokio = { version = "1", features = ["full"] }
