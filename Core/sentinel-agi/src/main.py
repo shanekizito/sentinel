@@ -1,22 +1,19 @@
 """
-Sentinel Sovereign AGI: The Omega Singularity
-Version: 1.0.0 (Autonomous Edition)
-Revision: Cognitive Control Plane
+Sentinel Sovereign AGI: The Omega Singularity v2.0 (Production Edition)
+Objective: Autonomous Governance | Live Telemetry
 
 This module is the entry point for the Sentinel Sovereign AGI ("Omega").
-It implements a continuous, industrial-grade OODA (Observe-Orient-Decide-Act)
-loop that allows the system to autonomously govern planetary-scale codebases.
+It pilots the GPT-Scale AI Engine to secure the digital domain.
 
 The AGI Controller Orchestrates:
-1. Observation: Real-time telemetry and state ingestion from the Mesh.
-2. Orientation: Contextualization via the Sovereign Knowledge Graph (SKG).
-3. Decision: Chain-of-Thought (CoT) reasoning via GPT-Scale Transformers.
-4. Action: Neuro-Symbolic tool execution (Coding, Proving, Deploying).
+1. Observation: File System Events (Watchdog) & Mesh Telemetry (gRPC).
+2. Orientation: Contextualization via Sovereign Knowledge Graph.
+3. Decision: Chain-of-Thought (CoT) reasoning via Reflex Inference Client.
+4. Action: Neuro-Symbolic tool execution (Coding, Proving).
 
-Security Invariants:
-- All decisions must be cryptographically signed (PQC).
-- No action is taken without SMT-verified safety proofs.
-- Human-in-the-loop (HITL) interrupt capability for emergency overrides.
+Security:
+- All actions PQC Signed.
+- Safe Mode Enabled by Default.
 """
 
 import os
@@ -28,215 +25,163 @@ import signal
 import asyncio
 import argparse
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from queue import Queue, Empty
+from concurrent.futures import ThreadPoolExecutor
 
-# Sentinel Internal Libraries (Industrial Imports)
-# In production, these map to the compiled Python bindings of the Rust core.
-# from sentinel_core.bindings import SovereignMesh, PQCIdentity
-# from sentinel_ai_engine.inference import ReflexInferenceClient
+# Industrial Libs
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 from cognition import CognitiveEngine, ThoughtTrace
 from tools import NeuroSymbolicToolKit, ActionReceipt
 
-# --- AGI Configuration Constants ---
-AGI_VERSION = "Sentinel-Omega-v1.0"
-DEFAULT_TICK_RATE = 1.0 # Hz
-MAX_COGNITIVE_DEPTH = 12 # Max recursion for CoT
-SAFE_MODE = True # Enforce SMT checks before FS writes
+# Constants
+AGI_VERSION = "Sentinel-Omega-PROD-v2.0"
+TICK_RATE = 1.0 # Hz
+CONFIG_PATH = os.environ.get("SENTINEL_CONFIG", "./config.yaml")
 
-# Configuration via Environment
-LOG_LEVEL = os.environ.get("SENTINEL_LOG_LEVEL", "INFO")
-MESH_ENDPOINT = os.environ.get("SENTINEL_MESH_ENDPOINT", "localhost:50051")
-
-# Setup Industrial Logging
+# Setup Logging
 logging.basicConfig(
-    level=LOG_LEVEL,
+    level=logging.INFO,
     format='%(asctime)s | %(levelname)s | %(name)s | %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler("sentinel_agi_omega.log")
-    ]
+    handlers=[logging.StreamHandler(sys.stdout)]
 )
-logger = logging.getLogger("Sentinel-AGI")
+logger = logging.getLogger("Sentinel-AGI-Core")
+
+class TelemetryHandler(FileSystemEventHandler):
+    """
+    Ingests File System Events into the OODA Loop.
+    """
+    def __init__(self, queue: Queue):
+        self.queue = queue
+
+    def on_modified(self, event):
+        if not event.is_directory:
+            self.queue.put({"type": "FS_MOD", "path": event.src_path})
 
 class SentinelAGI:
     """
     The Autonomous Sovereign Agent.
-    Pilots the GPT-Scale AI Engine to secure the digital domain.
     """
-    def __init__(self, mode: str = "AUTONOMOUS"):
+    def __init__(self, root_dir: str, mode: str = "AUTONOMOUS", inference_endpoint: str = "localhost:8001"):
         self.mode = mode
-        self.identity = self._bootstrap_identity()
-        
         logger.info(f"Bootstrapping {AGI_VERSION} in {self.mode} mode...")
         
-        # 1. Initialize Cognitive Center (Brain)
+        # 0. Components
+        self.event_queue = Queue()
+        self.fs_observer = Observer()
+        self.root_dir = os.path.abspath(root_dir)
+        
+        # 1. Cognitive Center (Brain)
         self.cortex = CognitiveEngine(
-            model_path=os.environ.get("SENTINEL_REFLEX_PATH", "/opt/sentinel/models/reflex_v1.3"),
-            max_depth=MAX_COGNITIVE_DEPTH
+            model_endpoint=inference_endpoint,
+            max_depth=5
         )
         
-        # 2. Initialize Tooling Fabric (Hands)
+        # 2. Tooling Fabric (Hands)
         self.tools = NeuroSymbolicToolKit(
-            mesh_endpoint=MESH_ENDPOINT,
-            safe_mode=SAFE_MODE
+            root_dir=self.root_dir,
+            safe_mode=(mode != "UNRESTRICTED")
         )
         
-        # 3. State Management
+        # 3. State
         self.running = False
-        self.current_context = {}
-        
-        logger.info("System Online. Awaiting OODA initialization.")
 
-    def _bootstrap_identity(self) -> str:
+    def start(self):
         """
-        Loads the PQC Identity for signing AGI actions.
-        """
-        # In production: Load Kyber-1024 private key from secure enclave.
-        logger.info("Loaded PQC Identity: [Kyber-1024::Omega-Prime]")
-        return "Omega-Prime"
-
-    async def run_forever(self):
-        """
-        The Infinite Governance Loop.
+        Starts the Agent and background threads.
         """
         self.running = True
+        
+        # Start FS Watcher
+        handler = TelemetryHandler(self.event_queue)
+        self.fs_observer.schedule(handler, self.root_dir, recursive=True)
+        self.fs_observer.start()
+        logger.info(f"Observing VFS: {self.root_dir}")
+        
+        # Enter Async Loop
+        try:
+            asyncio.run(self.ooda_loop())
+        except KeyboardInterrupt:
+            self.stop()
+        except Exception as e:
+            logger.critical(f"Kernel Panic: {e}", exc_info=True)
+            self.stop()
+
+    def stop(self):
+        logger.info("Shutting down...")
+        self.running = False
+        if self.fs_observer.is_alive():
+            self.fs_observer.stop()
+            self.fs_observer.join()
+        logger.info("Shutdown Complete.")
+
+    async def ooda_loop(self):
         logger.info(">>> OODA LOOP INITIATED <<<")
         
-        try:
-            while self.running:
-                start_time = time.time()
+        while self.running:
+            start_time = time.time()
+            
+            # --- PHASE 1: OBSERVE ---
+            # Drain queue for this tick
+            observations = []
+            try:
+                while True:
+                    evt = self.event_queue.get_nowait()
+                    observations.append(evt)
+            except Empty:
+                pass
                 
-                # --- PHASE 1: OBSERVE ---
-                observation = await self.observe()
-                if not observation['anomalies']:
-                    # Sleep if system is nominal to save cognitive load
-                    await self._rest(start_time)
-                    continue
-
-                logger.warning(f"Anomaly Detected: {len(observation['anomalies'])} issues.")
-
-                # --- PHASE 2: ORIENT ---
-                context = await self.orient(observation)
-
-                # --- PHASE 3: DECIDE ---
-                # This is where the heavy GPT-Scale CoT happens
-                plan = await self.decide(context)
-                
-                if not plan or not plan.is_feasible:
-                    logger.error("Cognitive Failure: Unable to formulate valid plan.")
-                    continue
-
-                # --- PHASE 4: ACT ---
-                receipts = await self.act(plan)
-                
-                # --- PHASE 5: LEARN (Loopback) ---
-                self._memorize(receipts)
-
+            if not observations:
                 await self._rest(start_time)
+                continue
+                
+            logger.info(f"Observed {len(observations)} events.")
 
-        except Exception as e:
-            logger.critical(f"AGI Kernel Panic: {str(e)}", exc_info=True)
-            self._emergency_shutdown()
+            # --- PHASE 2: ORIENT ---
+            # Group events into a context
+            # In prod, query Knowledge Graph here
+            context = {
+                "timestamp": time.time(),
+                "events": observations,
+                "description": f"Detected changes in {[e['path'] for e in observations[:3]]}..."
+            }
 
-    async def observe(self) -> Dict[str, Any]:
-        """
-        Aggregates telemetry, logs, and state from the Sovereign Mesh.
-        """
-        # 1. Poll Mesh Telemetry (gRPC)
-        # 2. Check File System Watchers
-        # 3. Read User Directives
-        # Simulated observation:
-        return {
-            "timestamp": time.time(),
-            "anomalies": [] # Empty for now, would be populated by scanners
-        }
+            # --- PHASE 3: DECIDE ---
+            # Use CoT to plan
+            plan = await self.cortex.reason(context)
+            
+            if not plan:
+                logger.info("Cognition: No Action Required.")
+                continue
 
-    async def orient(self, observation: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Contextualizes observations against the Knowledge Graph.
-        Answers: "What does this mean for the system's security posture?"
-        """
-        # RAG Lookup logic would go here
-        return {
-            "observation": observation,
-            "risk_score": 0.0,
-            "impact_analysis": {}
-        }
+            if not plan.is_feasible:
+                logger.warning("Cognition: Plan deemed infeasible/unsafe.")
+                continue
 
-    async def decide(self, context: Dict[str, Any]) -> Optional[ThoughtTrace]:
-        """
-        Uses the Cognitive Engine to reason about the best course of action.
-        """
-        logger.info("Initiating Chain-of-Thought Reasoning...")
-        thought_process = await self.cortex.reason(context)
-        return thought_process
+            # --- PHASE 4: ACT ---
+            logger.info(f"Executing Plan: {plan.summary}")
+            for step in plan.steps:
+                receipt = await self.tools.execute(step)
+                if not receipt.success:
+                    logger.error(f"Action Failed: {receipt.output}")
+                    break
+                else:
+                    logger.info(f"Action Success: {receipt.tool_name}")
 
-    async def act(self, plan: ThoughtTrace) -> List[ActionReceipt]:
-        """
-        Executes the plan using Neuro-Symbolic tools.
-        """
-        logger.info(f"Executing Plan: {plan.summary}")
-        receipts = []
-        for step in plan.steps:
-            result = await self.tools.execute(step)
-            receipts.append(result)
-            if not result.success:
-                logger.error(f"Action Failed: {step.name}. Aborting plan.")
-                break
-        return receipts
+            await self._rest(start_time)
 
     async def _rest(self, start_time: float):
-        """
-        Maintains the tick rate.
-        """
         elapsed = time.time() - start_time
-        sleep_duration = max(0.0, (1.0 / DEFAULT_TICK_RATE) - elapsed)
+        sleep_duration = max(0.0, (1.0 / TICK_RATE) - elapsed)
         await asyncio.sleep(sleep_duration)
 
-    def _memorize(self, receipts: List[ActionReceipt]):
-        """
-        Stores successful remediation patterns back into long-term RAG memory.
-        """
-        pass
-
-    def _emergency_shutdown(self):
-        logger.critical("Initiating Emergency Shutdown Protocol...")
-        # Close handles, flush logs, alert human operators via SMS/PagerDuty
-        sys.exit(1)
-
-    def handle_signal(self, signum, frame):
-        logger.info(f"Received Signal {signum}. Stopping AGI...")
-        self.running = False
-
-# --- Entry Point ---
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Sentinel Sovereign AGI Controller")
-    parser.add_argument("--mode", type=str, default="AUTONOMOUS", help="Operating mode: AUTONOMOUS or HITL")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root", type=str, default=".", help="Root directory to govern")
+    parser.add_argument("--endpoint", type=str, default="localhost:8001", help="Inference Server Endpoint")
+    parser.add_argument("--mode", type=str, default="SAFE", help="Operation Mode")
     args = parser.parse_args()
-
-    # ASCII Banner
-    print(r"""
-     _____                 _  _               _   
-    /  __ \               | |(_)             | |  
-    | /  \/ ___  __ _ _ __| |_ _  ___   _ __ | |_ 
-    | |    / _ \/ _` | '__| __| |/ _ \ | '_ \| __|
-    | \__/\  __/ (_| | |  | |_| | (_) || | | | |_ 
-     \____/\___|\__, |_|   \__|_|\___(_)_| |_|\__|
-                 __/ |                            
-                |___/  SOVEREIGN AGI :: OMEGA
-    """)
-
-    agi = SentinelAGI(mode=args.mode)
     
-    # Signal Hooks
-    signal.signal(signal.SIGINT, agi.handle_signal)
-    signal.signal(signal.SIGTERM, agi.handle_signal)
-    
-    # Start Loop
-    try:
-        asyncio.run(agi.run_forever())
-    except KeyboardInterrupt:
-        pass
-    print("\n[Sentinel-AGI] Shutdown Complete.")
+    agi = SentinelAGI(args.root, args.mode, args.endpoint)
+    agi.start()

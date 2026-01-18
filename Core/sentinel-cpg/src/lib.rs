@@ -2,6 +2,7 @@ pub mod taint;
 pub mod mmap_engine;
 pub mod graph;
 pub mod traversal;
+pub mod ingest;
 
 use serde::{Deserialize, Serialize};
 

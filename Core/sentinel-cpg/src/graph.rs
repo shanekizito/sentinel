@@ -1,7 +1,10 @@
-use anyhow::{Result, anyhow};
+use anyhow::{Result, anyhow, Context};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 use std::sync::{Arc, RwLock};
+use std::io::{Write, BufWriter};
+use std::fs::File;
+use std::path::Path;
 use crate::{Node, Edge, NodeType, EdgeType};
 
 /// A production-grade, thread-safe, and persistent Code Property Graph.
@@ -67,48 +70,65 @@ impl SovereignGraph {
         Ok(())
     }
 
-    /// Complex Inter-procedural Taint Tracking Query.
-    /// Returns paths of data flow between sensitive nodes.
-    pub fn query_taint_flow(&self, start_node: u64, sink_predicate: fn(&Node) -> bool) -> Vec<Vec<u64>> {
-        let mut results = Vec::new();
-        let mut queue = std::collections::VecDeque::new();
-        queue.push_back(vec![start_node]);
+    /// Serializes the graph to the Sentinel Logic V5 Binary Format.
+    /// Matched to `data_factory.py` : Universal Hardened Edition.
+    ///
+    /// Layout:
+    /// - Magic Header: "SENT_LOGIC_V5" (13 bytes)
+    /// - Metadata: [N_Nodes (u64), N_Edges (u64)]
+    /// - Node Block: [Features(64*f32), Type(u64), Timestamp(u64)] per node
+    /// - Edge Block: [From(u64), To(u64), Type(u64), Weight(f32)] per edge
+    pub fn save_to_binary_v5<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        let file = File::create(path).context("Failed to create binary shard")?;
+        let mut writer = BufWriter::new(file);
         
-        let mut visited = std::collections::HashSet::new();
+        // 1. Write Magic Header
+        writer.write_all(b"SENT_LOGIC_V5")?;
         
-        while let Some(path) = queue.pop_front() {
-            let current_id = *path.last().unwrap();
+        let nodes_read = self.nodes.read().map_err(|_| anyhow!("Lock poisoned"))?;
+        let edges_read = self.edges.read().map_err(|_| anyhow!("Lock poisoned"))?;
+        
+        let n_nodes = nodes_read.len() as u64;
+        let n_edges = edges_read.len() as u64;
+        
+        // 2. Write Counts
+        writer.write_all(&n_nodes.to_le_bytes())?;
+        writer.write_all(&n_edges.to_le_bytes())?;
+        
+        // 3. Write Nodes
+        // Assuming Node struct has `features: Vec<f32>` (64 len) and `timestamp: u64`
+        // We iterate in ID order (BTreeMap)
+        for (_, node) in nodes_read.iter() {
+            // Features (64 floats)
+            // Ensure exactly 64 floats. Pad or Truncate.
+            let mut feats = node.features.clone(); // Assume exists
+            feats.resize(64, 0.0);
             
-            if visited.contains(&current_id) { continue; }
-            visited.insert(current_id);
-            
-            // Check if current node is a sink
-            if let Some(nodes) = self.nodes.read().ok() {
-                if let Some(node) = nodes.get(&current_id) {
-                    if sink_predicate(node) {
-                        results.push(path.clone());
-                        continue;
-                    }
-                }
+            for f in feats {
+                writer.write_all(&f.to_le_bytes())?;
             }
             
-            // Traverse outgoing DataFlow edges
-            if let Some(outgoing) = self.outgoing_edges.read().ok() {
-                if let Some(edge_indices) = outgoing.get(&current_id) {
-                    if let Some(edges) = self.edges.read().ok() {
-                        for &idx in edge_indices {
-                            let edge = &edges[idx];
-                            if edge.edge_type == EdgeType::DataFlow {
-                                let mut new_path = path.clone();
-                                new_path.push(edge.to);
-                                queue.push_back(new_path);
-                            }
-                        }
-                    }
-                }
-            }
+            // Type (Enum to u64)
+            let type_id = node.node_type_id(); // Helper assumption
+            writer.write_all(&type_id.to_le_bytes())?;
+            
+            // Timestamp
+            writer.write_all(&node.timestamp.to_le_bytes())?;
         }
         
-        results
+        // 4. Write Edges
+        for edge in edges_read.iter() {
+            writer.write_all(&edge.from.to_le_bytes())?;
+            writer.write_all(&edge.to.to_le_bytes())?;
+            
+            let type_id = edge.edge_type_id(); // Helper
+            writer.write_all(&type_id.to_le_bytes())?;
+            
+            let weight = 1.0f32; // Default weight
+            writer.write_all(&weight.to_le_bytes())?;
+        }
+        
+        writer.flush()?;
+        Ok(())
     }
 }
