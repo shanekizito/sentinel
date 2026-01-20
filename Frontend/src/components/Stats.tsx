@@ -47,7 +47,7 @@ const colorMap = {
   mint: {
     bg: "bg-mint-soft",
     text: "text-mint",
-    gradient: "from-mint to-emerald-400",
+    gradient: "from-mint to-primary",
   },
   rose: {
     bg: "bg-rose-soft",
@@ -65,14 +65,14 @@ function AnimatedNumber({ value, prefix = "", suffix = "" }: { value: number; pr
   const [displayValue, setDisplayValue] = useState(0);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
-  
+
   useEffect(() => {
     if (isInView) {
       const duration = 2000;
       const steps = 60;
       const increment = value / steps;
       let current = 0;
-      
+
       const timer = setInterval(() => {
         current += increment;
         if (current >= value) {
@@ -82,11 +82,11 @@ function AnimatedNumber({ value, prefix = "", suffix = "" }: { value: number; pr
           setDisplayValue(current);
         }
       }, duration / steps);
-      
+
       return () => clearInterval(timer);
     }
   }, [isInView, value]);
-  
+
   return (
     <span ref={ref} className="metric-value">
       {prefix}{displayValue.toFixed(value % 1 === 0 ? 0 : 1)}{suffix}
@@ -100,7 +100,7 @@ const Stats = () => {
       {/* Background elements */}
       <div className="absolute inset-0 bg-gradient-mesh opacity-50" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-radial opacity-30" />
-      
+
       <div className="container mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -124,7 +124,7 @@ const Stats = () => {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
           {metrics.map((metric, index) => {
             const colors = colorMap[metric.color as keyof typeof colorMap];
-            
+
             return (
               <motion.div
                 key={metric.label}
@@ -137,20 +137,20 @@ const Stats = () => {
                 <div className="relative h-full p-6 rounded-3xl bg-card border border-border/60 hover:border-border hover:shadow-xl transition-all duration-500 overflow-hidden">
                   {/* Subtle gradient overlay on hover */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${colors.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500`} />
-                  
+
                   {/* Icon */}
                   <div className={`w-12 h-12 rounded-2xl ${colors.bg} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
                     <metric.icon className={`w-5 h-5 ${colors.text}`} />
                   </div>
-                  
+
                   {/* Value */}
                   <p className="font-display text-4xl sm:text-5xl font-normal text-foreground mb-2 tracking-tight">
                     <AnimatedNumber value={metric.value} prefix={metric.prefix} suffix={metric.suffix} />
                   </p>
-                  
+
                   {/* Label */}
                   <p className="font-semibold text-foreground mb-1">{metric.label}</p>
-                  
+
                   {/* Subtext with indicator */}
                   <div className="flex items-center gap-2">
                     <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${colors.gradient}`} />
@@ -161,7 +161,7 @@ const Stats = () => {
             );
           })}
         </div>
-        
+
         {/* Bottom trust indicator */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

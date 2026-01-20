@@ -1,66 +1,72 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Mail, MessageSquare, MapPin } from "lucide-react";
+import { Mail, MessageSquare, MapPin, ArrowRight } from "lucide-react";
 
 const Contact = () => {
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="min-h-screen bg-white flex flex-col font-sans">
             <Navbar />
-            <main className="flex-grow pt-24 pb-20">
+            <main className="flex-grow pt-32 pb-20">
                 <div className="container mx-auto px-6">
-                    <div className="grid lg:grid-cols-2 gap-20">
-                        {/* Info */}
-                        <div className="space-y-10">
-                            <div>
-                                <h1 className="font-display text-4xl lg:text-5xl font-bold mb-6">Talk to our security engineers.</h1>
-                                <p className="text-xl text-muted-foreground leading-relaxed">
+                    <div className="grid lg:grid-cols-2 gap-px bg-gray-200 border-2 border-gray-200">
+                        {/* Info Side */}
+                        <div className="bg-white p-12 lg:p-20 flex flex-col justify-between">
+                            <div className="space-y-8">
+                                <h1 className="font-display text-5xl font-bold bg-white text-gray-900 leading-tight">
+                                    Talk to our <br />
+                                    <span className="text-primary">security engineers.</span>
+                                </h1>
+                                <p className="text-xl text-gray-600 leading-relaxed font-light border-l-2 border-gray-100 pl-6">
                                     We help teams of all sizes secure their infrastructure.
                                     Whether you need a custom enterprise plan or technical support, we're here.
                                 </p>
                             </div>
 
-                            <div className="space-y-6">
+                            <div className="space-y-6 mt-16">
                                 {[
                                     { icon: <Mail className="w-5 h-5" />, label: "Email Us", value: "security@sentinel.dev" },
                                     { icon: <MessageSquare className="w-5 h-5" />, label: "Live Chat", value: "Available 9am-5pm EST" },
                                     { icon: <MapPin className="w-5 h-5" />, label: "HQ", value: "San Francisco, CA" },
                                 ].map((item) => (
-                                    <div key={item.label} className="flex items-center gap-4 p-4 border border-border rounded-xl bg-white">
-                                        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground">
+                                    <div key={item.label} className="flex items-center gap-6 group">
+                                        <div className="w-12 h-12 border-2 border-gray-900 flex items-center justify-center text-gray-900 group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-colors">
                                             {item.icon}
                                         </div>
                                         <div>
-                                            <div className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-0.5">{item.label}</div>
-                                            <div className="font-medium text-foreground">{item.value}</div>
+                                            <div className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">{item.label}</div>
+                                            <div className="font-bold text-gray-900 text-lg">{item.value}</div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Form */}
-                        <div className="bg-white p-8 rounded-2xl border border-border shadow-sm">
-                            <form className="space-y-6">
-                                <div className="grid md:grid-cols-2 gap-6">
+                        {/* Form Side */}
+                        <div className="bg-gray-50 p-12 lg:p-20 relative overflow-hidden">
+                            {/* Grid Background */}
+                            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:2rem_2rem] pointer-events-none" />
+
+                            <form className="space-y-8 relative z-10 max-w-md mx-auto">
+                                <div className="grid md:grid-cols-2 gap-8">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-foreground">First Name</label>
-                                        <input type="text" className="w-full px-4 py-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-background" placeholder="Jane" />
+                                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500">First Name</label>
+                                        <input type="text" className="w-full px-4 py-4 bg-white border-2 border-gray-200 focus:border-gray-900 outline-none transition-colors placeholder:text-gray-300 rounded-none text-gray-900 font-bold" placeholder="JANE" />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-foreground">Last Name</label>
-                                        <input type="text" className="w-full px-4 py-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-background" placeholder="Doe" />
+                                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Last Name</label>
+                                        <input type="text" className="w-full px-4 py-4 bg-white border-2 border-gray-200 focus:border-gray-900 outline-none transition-colors placeholder:text-gray-300 rounded-none text-gray-900 font-bold" placeholder="DOE" />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-foreground">Work Email</label>
-                                    <input type="email" className="w-full px-4 py-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-background" placeholder="jane@company.com" />
+                                    <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Work Email</label>
+                                    <input type="email" className="w-full px-4 py-4 bg-white border-2 border-gray-200 focus:border-gray-900 outline-none transition-colors placeholder:text-gray-300 rounded-none text-gray-900 font-bold" placeholder="jane@company.com" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-foreground">Message</label>
-                                    <textarea className="w-full px-4 py-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-background min-h-[150px]" placeholder="Tell us about your security needs..."></textarea>
+                                    <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Message</label>
+                                    <textarea className="w-full px-4 py-4 bg-white border-2 border-gray-200 focus:border-gray-900 outline-none transition-colors placeholder:text-gray-300 rounded-none min-h-[150px] text-gray-900 font-bold resize-none" placeholder="Tell us about your security needs..."></textarea>
                                 </div>
-                                <button type="button" className="w-full btn-primary py-4 text-base">
-                                    Send Message
+                                <button type="button" className="w-full h-16 bg-primary text-white font-bold uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center justify-center gap-3 text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
+                                    Send Message <ArrowRight className="w-5 h-5" />
                                 </button>
                             </form>
                         </div>

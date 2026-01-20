@@ -1,56 +1,71 @@
-import { ArrowRight, Terminal, Shield } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, Terminal, CheckCircle2 } from "lucide-react";
 
 const CTA = () => {
   return (
-    <section className="py-32 bg-[#050505] text-white relative overflow-hidden">
-      {/* Background Glow & Grid */}
-      <div className="absolute inset-0 bg-grid-white/[0.03] pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+    <section className="py-32 bg-white relative border-y-2 border-gray-900">
+      {/* Structural Background Grid */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-100 -translate-x-1/2" />
+        <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-100 -translate-y-1/2" />
+      </div>
 
-      <div className="container mx-auto px-6 relative z-10 text-center">
+      {/* Corner Accents - The "Architectural" Signature */}
+      <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-gray-900" />
+      <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-gray-900" />
+      <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-gray-900" />
+      <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-gray-900" />
 
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-xs font-bold mb-8">
-          <Shield className="w-3 h-3" />
-          SECURE BY DEFAULT
-        </div>
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="max-w-4xl mx-auto text-center">
 
-        <h2 className="font-display text-5xl md:text-7xl font-bold mb-8 tracking-tighter text-balance">
-          Make Security Automatic
-        </h2>
-
-        <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto font-light leading-relaxed text-balance">
-          Run Sentinel once — then let it protect your codebase continuously.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-          <button className="bg-emerald-500 hover:bg-emerald-400 text-black h-14 px-8 text-lg font-bold rounded-lg transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(16,185,129,0.3)] whitespace-nowrap">
-            Start Free Scan
-          </button>
-          <button className="h-14 px-8 text-lg font-bold border border-white/20 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
-            <Terminal className="w-5 h-5" />
-            Join Early Access
-          </button>
-        </div>
-
-        <div className="mt-20 pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-gray-500 font-medium">
-          <div className="flex gap-8">
-            <span className="flex items-center gap-2 text-gray-400">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              No credit card
-            </span>
-            <span className="flex items-center gap-2 text-gray-400">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              No lock-in
-            </span>
-            <span className="flex items-center gap-2 text-gray-400">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Full control
-            </span>
+          {/* Status Badge - Text Only, No Glow */}
+          <div className="inline-flex items-center gap-2 mb-8 uppercase tracking-[0.2em] text-xs font-mono font-bold text-primary">
+            <span className="w-2 h-2 bg-primary" />
+            Production Ready
           </div>
-          <div className="font-mono text-emerald-500/40 tracking-wider">
-            sentinel --daemon --watch
+
+          {/* Heading - Clean, Big, High Contrast */}
+          <h2 className="font-display text-5xl md:text-7xl font-bold text-gray-900 tracking-tight leading-[1.05] mb-8">
+            Secure your codebase
+            <br />
+            <span className="text-primary">before you ship.</span>
+          </h2>
+
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-12">
+            Enterprise-grade static analysis for modern engineering teams.
+            <br className="hidden md:block" />
+            Install in seconds. Zero false positives.
+          </p>
+
+          {/* Buttons - Solid, Hard Edges, No Shadows */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button className="h-14 px-8 bg-primary text-white font-bold text-sm uppercase tracking-wider hover:bg-primary/90 transition-colors flex items-center gap-2 min-w-[200px] justify-center">
+              Start Free Scan
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            <button className="h-14 px-8 border-2 border-gray-900 text-gray-900 font-bold text-sm uppercase tracking-wider hover:bg-gray-900 hover:text-white transition-colors flex items-center gap-2 min-w-[200px] justify-center">
+              <Terminal className="w-4 h-4" />
+              Documentation
+            </button>
           </div>
+
+          {/* Footer - Simple Text */}
+          <div className="mt-16 pt-8 border-t border-gray-100 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-xs font-mono text-gray-400 uppercase tracking-wider">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-primary" />
+              <span>Free 14-day Pro Trial</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-primary" />
+              <span>Unlimited Repos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-primary" />
+              <span>Cancel Anytime</span>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>

@@ -130,29 +130,30 @@ impl SolverRaceCoordinator {
         format!("SSRC: Processed {} Proofs. Peak Memory: 1.2GB, Average Proof Time: 142ms", total)
     }
 
-    // --- Industrial Infinity Scaling Logic ---
+use crate::solver::{Z3Solver, SmtResult};
 
-    /// Custom Theory Injection: Injects Bitvector overflows into the solver stream.
-    pub fn inject_sovereign_theories(&self, script: &mut String) {
-        script.push_str("(set-logic QF_ABV)\n"); // Arrays, Bitvectors, Uninterpreted Functions
-        script.push_str("(define-fun is_safe_add ((x (_ BitVec 64)) (y (_ BitVec 64))) Bool ...)\n");
-    }
-
-    /// Aggressive Stall Detection: Monitors solver process heartbeats.
-    pub fn monitor_solver_health(&self) {
-        // Implementation of OS-level process monitoring for SMT subprocesses
+async fn execute_real_solver(solver_type: &SolverType, query: &str) -> String {
+    let solver = Z3Solver::new();
+    
+    // In a multi-solver mesh, we'd spawn farklı binaries
+    // For this hardened core, we route through our high-performance Z3 bridge
+    match solver.solve(query) {
+        Ok(res) => match res {
+            SmtResult::Satisfiable(_) => "sat".to_string(),
+            SmtResult::Unsatisfiable => "unsat".to_string(),
+            SmtResult::Unknown => "unknown".to_string(),
+            SmtResult::Error(e) => format!("error: {}", e),
+        },
+        Err(e) => format!("failure: {}", e),
     }
 }
 
-async fn simulate_solver_execution(solver: &SolverType, _query: &str) -> String {
-    let delay = match solver {
-        SolverType::Z3 => Duration::from_millis(150),
-        SolverType::CVC5 => Duration::from_millis(100),
-        SolverType::Bitwuzla => Duration::from_millis(220),
-        SolverType::StandardSAT => Duration::from_millis(50),
-    };
-    tokio::time::sleep(delay).await;
-    "sat".to_string()
+impl SolverRaceCoordinator {
+    // ...
+    pub fn inject_sovereign_theories(&self, script: &mut String) {
+        script.push_str("(set-logic QF_AUFBV)\n"); 
+        script.push_str("(define-fun is_safe_add ((x (_ BitVec 64)) (y (_ BitVec 64))) Bool (bvaddno x y))\n");
+    }
 }
 
 // ... Additional 350 lines of SMT-LIB2 generation, FFI bindings, and parallel proof orchestration ...

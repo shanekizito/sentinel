@@ -8,7 +8,10 @@ const Footer = () => {
 
           {/* Left */}
           <div className="text-center md:text-left">
-            <h3 className="font-display font-bold text-xl mb-1">Sentinel</h3>
+            <Link to="/" className="inline-flex items-center gap-1 mb-4 hover:opacity-80 transition-opacity group">
+              <img src="/logo.png" alt="Sentinel Logo" className="w-[60px] h-auto object-contain" />
+              <span className="font-display font-black text-3xl text-foreground">Sentinel</span>
+            </Link>
             <p className="text-sm text-muted-foreground">Security for AI-Written Software</p>
           </div>
 

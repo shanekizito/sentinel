@@ -16,7 +16,7 @@ const HowItWorks = () => {
 
         <div className="relative max-w-5xl mx-auto">
           {/* Central Circuit Line */}
-          <div className="absolute left-[28px] md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-emerald-500/20 via-emerald-500/50 to-emerald-500/20 md:-translate-x-1/2" />
+          <div className="absolute left-[28px] md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/20 via-primary/50 to-primary/20 md:-translate-x-1/2" />
 
           {[
             {
@@ -53,8 +53,8 @@ const HowItWorks = () => {
             <div key={item.step} className={`relative flex items-center gap-8 mb-20 last:mb-0 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
 
               {/* Circuit Marker */}
-              <div className="absolute left-0 md:left-1/2 w-14 h-14 rounded-full bg-[#0A0A0A] border-4 border-gray-800 flex items-center justify-center md:-translate-x-1/2 z-10 shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-                <div className="text-emerald-500">{item.icon}</div>
+              <div className="absolute left-0 md:left-1/2 w-14 h-14 rounded-full bg-[#0A0A0A] border-4 border-gray-800 flex items-center justify-center md:-translate-x-1/2 z-10 shrink-0 shadow-[0_0_20px_rgba(0,166,118,0.2)]">
+                <div className="text-primary">{item.icon}</div>
               </div>
 
               {/* Spacer for Desktop Layout alignment */}
@@ -66,8 +66,8 @@ const HowItWorks = () => {
                   {/* Circuit Connection Line (Horizontal) */}
                   <div className={`hidden md:block absolute top-1/2 w-16 h-0.5 bg-gray-800 ${index % 2 === 0 ? '-right-16' : '-left-16'}`} />
 
-                  <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-3 block">Step {item.step}</span>
-                  <h3 className="font-bold text-2xl mb-4 text-white group-hover:text-emerald-400 transition-colors">{item.title}</h3>
+                  <span className="text-xs font-bold text-primary uppercase tracking-widest mb-3 block">Step {item.step}</span>
+                  <h3 className="font-bold text-2xl mb-4 text-white group-hover:text-primary transition-colors">{item.title}</h3>
                   <p className="text-gray-400 leading-relaxed text-base">{item.desc}</p>
                 </div>
               </div>

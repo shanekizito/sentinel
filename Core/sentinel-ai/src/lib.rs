@@ -35,11 +35,11 @@ pub struct Reflex {
 }
 
 impl Reflex {
-    pub fn new(model_path: &str, tiriton_endpoint: &str, vector_db: &str) -> Self {
+    pub fn new(model_path: &str, triton_endpoint: &str, dimension: usize) -> Self {
         Self {
             encoder: GcnEncoder::new(model_path),
-            bridge: InferenceBridge::new(tiriton_endpoint, "reflex-v1"),
-            rag: SemanticRagHub::new(vector_db),
+            bridge: InferenceBridge::new(triton_endpoint, "reflex-v1"),
+            rag: SemanticRagHub::new(dimension),
         }
     }
 

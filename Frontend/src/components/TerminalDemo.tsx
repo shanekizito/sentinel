@@ -111,7 +111,7 @@ export const TerminalDemo = () => {
                 <div className="flex-1">
                   <div className="flex items-start gap-2">
                     <span className={cn("font-bold mt-0.5",
-                      log.type === 'success' ? 'text-emerald-400' :
+                      log.type === 'success' ? 'text-primary' :
                         log.type === 'warning' ? 'text-amber-400' :
                           log.type === 'error' ? 'text-red-400' :
                             log.type === 'process' ? 'text-blue-400' :
@@ -139,8 +139,8 @@ export const TerminalDemo = () => {
             <div className="flex gap-3 pt-2 opacity-80 pl-2">
               <span className="text-white/20 shrink-0 select-none text-xs">[{new Date().toLocaleTimeString('en-US', { hour12: false })}]</span>
               <div className="flex items-center gap-2">
-                <span className="text-emerald-500 font-bold">➜</span>
-                <span className="w-2 h-4 bg-emerald-500 animate-blink" />
+                <span className="text-primary font-bold">➜</span>
+                <span className="w-2 h-4 bg-primary animate-blink" />
               </div>
             </div>
           </div>

@@ -13,7 +13,7 @@ const EmbeddedSection = () => {
                                 <div className="bg-gray-100 p-3 rounded-lg"><History className="w-6 h-6 text-gray-500" /></div>
                                 <div className="bg-gray-100 p-3 rounded-lg"><Brain className="w-6 h-6 text-gray-500" /></div>
                             </div>
-                            <div className="bg-emerald-50 px-6 py-2 rounded-full border border-emerald-100 text-emerald-700 font-bold text-sm mb-2">
+                            <div className="bg-primary/5 px-6 py-2 rounded-full border border-primary/20 text-primary font-bold text-sm mb-2">
                                 Context Retained
                             </div>
                             <p className="text-xs text-gray-500 max-w-[200px] mx-auto">
@@ -37,13 +37,13 @@ const EmbeddedSection = () => {
                                 "Flags AI re-introduction patterns"
                             ].map((item) => (
                                 <div key={item} className="flex items-center gap-3">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                                     <span className="font-medium text-foreground">{item}</span>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="mt-8 p-4 bg-white border-l-4 border-emerald-500 shadow-sm rounded-r-lg">
+                        <div className="mt-8 p-4 bg-white border-l-4 border-primary shadow-sm rounded-r-lg">
                             <p className="text-sm text-gray-600 italic">
                                 "Most tools forget. Sentinel accumulates understanding."
                             </p>

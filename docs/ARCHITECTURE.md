@@ -17,10 +17,10 @@ Sentinel utilizes a dual-layered AI architecture designed for **Industrial Code 
 
 | Component | Technical Role | Implementation File |
 | :--- | :--- | :--- |
-| **Logic Encoder** | GCN-based sub-graph embedding | [`Core/sentinel-ai/src/lib.rs`](file:///c:/Users/admin/Downloads/Compressed/sentinel-main/Core/sentinel-ai/src/lib.rs) |
-| **Inference Bridge** | gRPC communication with Triton | [`Core/sentinel-ai/src/bridge.rs`](file:///c:/Users/admin/Downloads/Compressed/sentinel-main/Core/sentinel-ai/src/bridge.rs) |
-| **Semantic RAG** | Vectorized knowledge retrieval | [`Core/sentinel-ai/src/rag.rs`](file:///c:/Users/admin/Downloads/Compressed/sentinel-main/Core/sentinel-ai/src/rag.rs) |
-| **Reflex Engine** | Autonomous remediation orchestrator | [`Core/sentinel-ai/src/lib.rs`](file:///c:/Users/admin/Downloads/Compressed/sentinel-main/Core/sentinel-ai/src/lib.rs) |
+| **Logic Encoder** | GCN-based sub-graph embedding | [`Core/sentinel-ai/src/lib.rs`](../Core/sentinel-ai/src/lib.rs) |
+| **Inference Bridge** | gRPC communication with Triton | [`Core/sentinel-ai/src/bridge.rs`](../Core/sentinel-ai/src/bridge.rs) |
+| **Semantic RAG** | Vectorized knowledge retrieval | [`Core/sentinel-ai/src/rag.rs`](../Core/sentinel-ai/src/rag.rs) |
+| **Reflex Engine** | Autonomous remediation orchestrator | [`Core/sentinel-ai/src/lib.rs`](../Core/sentinel-ai/src/lib.rs) |
 
 ---
 
@@ -28,22 +28,22 @@ Sentinel utilizes a dual-layered AI architecture designed for **Industrial Code 
 
 ### 2.1 The GCN Encoder
 - **Implementation:** `GcnEncoder` struct.
-- **Location:** [`Core/sentinel-ai/src/lib.rs`](file:///c:/Users/admin/Downloads/Compressed/sentinel-main/Core/sentinel-ai/src/lib.rs)
+- **Location:** [`Core/sentinel-ai/src/lib.rs`](../Core/sentinel-ai/src/lib.rs)
 - **Logic:** Converts the raw **CPG** nodes and edges into high-dimensional latent vectors (embeddings).
 
 ### 2.2 The Sovereign Inference Bridge
 - **Implementation:** `InferenceBridge` struct.
-- **Location:** [`Core/sentinel-ai/src/bridge.rs`](file:///c:/Users/admin/Downloads/Compressed/sentinel-main/Core/sentinel-ai/src/bridge.rs)
+- **Location:** [`Core/sentinel-ai/src/bridge.rs`](../Core/sentinel-ai/src/bridge.rs)
 - **Security:** Enforces **PQC** (Kyber-1024) signatures on all inference payloads.
 
 ### 2.3 Semantic RAG 2.0
 - **Implementation:** `SemanticRagHub` struct.
-- **Location:** [`Core/sentinel-ai/src/rag.rs`](file:///c:/Users/admin/Downloads/Compressed/sentinel-main/Core/sentinel-ai/src/rag.rs)
+- **Location:** [`Core/sentinel-ai/src/rag.rs`](../Core/sentinel-ai/src/rag.rs)
 - **Logic:** Implements **Retrieval-Augmented Generation** over planetary-scale vector indices.
 
 ### 2.4 The Reflex Orchestration Engine
 - **Implementation:** `Reflex` struct.
-- **Location:** [`Core/sentinel-ai/src/lib.rs`](file:///c:/Users/admin/Downloads/Compressed/sentinel-main/Core/sentinel-ai/src/lib.rs)
+- **Location:** [`Core/sentinel-ai/src/lib.rs`](../Core/sentinel-ai/src/lib.rs)
 - **Role:** Central hub coordinating encoding, retrieval, and synthesis.
 
 ---

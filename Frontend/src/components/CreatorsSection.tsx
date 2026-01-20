@@ -15,7 +15,7 @@ const CreatorsSection = () => {
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-violet-soft/50 via-background to-background" />
       <div className="absolute inset-0 bg-gradient-mesh opacity-30" />
-      
+
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
           {/* Content */}
@@ -29,15 +29,15 @@ const CreatorsSection = () => {
               <Users className="w-3.5 h-3.5 text-violet" />
               <span className="text-xs font-semibold text-violet uppercase tracking-wider">For Creators</span>
             </div>
-            
+
             <h2 className="font-display text-display-sm sm:text-display-md font-normal mb-6 text-balance">
               Your talent,{" "}
               <span className="italic text-violet">fairly</span> rewarded
             </h2>
-            
+
             <p className="text-lg text-muted-foreground leading-relaxed mb-10 max-w-lg">
-              No more chasing invoices. No more undervalued work. 
-              Build your reputation with verified performance data 
+              No more chasing invoices. No more undervalued work.
+              Build your reputation with verified performance data
               and get paid instantly when you deliver.
             </p>
 
@@ -70,7 +70,7 @@ const CreatorsSection = () => {
           >
             {/* Glow effect */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-violet/10 rounded-full blur-[80px]" />
-            
+
             <div className="relative glass-card-strong rounded-3xl p-8 hover-lift">
               {/* Profile Header */}
               <div className="flex items-center gap-5 mb-8">
@@ -87,7 +87,7 @@ const CreatorsSection = () => {
               {/* Stats Grid */}
               <div className="grid grid-cols-3 gap-4 mb-8">
                 {[
-                  { value: "94%", label: "Delivery", color: "text-mint" },
+                  { value: "94%", label: "Delivery", color: "text-primary" },
                   { value: "4.8", label: "Rating", color: "text-gold" },
                   { value: "47", label: "Campaigns", color: "text-violet" },
                 ].map((stat, i) => (
@@ -99,23 +99,23 @@ const CreatorsSection = () => {
               </div>
 
               {/* Earnings Card */}
-              <div className="flex items-center justify-between p-5 rounded-2xl bg-gradient-to-r from-mint-soft to-emerald-50 border border-mint/15">
+              <div className="flex items-center justify-between p-5 rounded-2xl bg-gradient-to-r from-gray-50 to-primary/5 border border-primary/15">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Total earned</p>
                   <p className="font-display text-3xl font-normal text-foreground">$52,840</p>
                 </div>
                 <div className="text-right">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-mint/10 text-mint text-xs font-semibold mb-1">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-1">
                     <CheckCircle2 className="w-3 h-3" />
                     Verified
                   </div>
                   <p className="text-xs text-muted-foreground">Top Creator</p>
                 </div>
               </div>
-              
+
               {/* Recent activity indicator */}
               <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-                <div className="w-2 h-2 rounded-full bg-mint animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                 <span>Active now • Last campaign 2 days ago</span>
               </div>
             </div>

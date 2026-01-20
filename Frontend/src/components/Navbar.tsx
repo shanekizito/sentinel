@@ -27,47 +27,10 @@ const Navbar = () => {
       <div className="container mx-auto px-6 relative">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group">
+          <Link to="/" className="flex items-center gap-1 group">
             {/* Custom Sentinel Logo */}
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 28 28"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="text-primary"
-            >
-              <rect
-                x="2"
-                y="2"
-                width="24"
-                height="24"
-                rx="4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                fill="none"
-              />
-              <path
-                d="M14 7L14 14L19 14"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <circle
-                cx="14"
-                cy="14"
-                r="5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                fill="none"
-              />
-              <circle cx="14" cy="7" r="1.5" fill="currentColor" />
-              <circle cx="14" cy="21" r="1.5" fill="currentColor" />
-              <circle cx="7" cy="14" r="1.5" fill="currentColor" />
-              <circle cx="21" cy="14" r="1.5" fill="currentColor" />
-            </svg>
-            <span className="font-display font-semibold text-base text-foreground tracking-tight">
+            <img src="/logo.png" alt="Sentinel Logo" className="w-[60px] h-auto object-contain" />
+            <span className="font-display font-bold text-2xl text-foreground tracking-tight">
               Sentinel
             </span>
           </Link>

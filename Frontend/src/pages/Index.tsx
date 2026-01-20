@@ -14,34 +14,38 @@ import CodeDiffViewer from "@/components/CodeDiffViewer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground font-sans">
       <Navbar />
       <main>
         <Hero />
 
-        {/* Social Proof / Stack */}
-        <section className="py-10 border-b border-border bg-secondary/20">
+        {/* Social Proof / Stack - Lighter Treatment */}
+        <section className="py-12 border-b border-border/40 bg-[#FAfaf9]">
           <div className="container mx-auto px-6">
-            <p className="text-center text-sm text-muted-foreground mb-6">Seamlessly integrated with your modern stack</p>
-            <IntegrationsGrid />
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+              <IntegrationsGrid />
+            </div>
           </div>
         </section>
 
         <ProblemSection />
 
-        {/* High Impact Visual: Code Diff */}
-        <section className="py-24 bg-background relative overflow-hidden">
-          <div className="container mx-auto px-6 relative z-10">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="font-display text-4xl font-bold mb-4 text-foreground">Don't just scan code. Fix it.</h2>
-              <p className="text-muted-foreground text-lg">Sentinel understands context, imports, and type safety to generate patches you'll actually merge.</p>
+        <CoreProposition />
+        <FeatureShowcase />
+
+        {/* Code Diff Section */}
+        <section className="py-32 bg-white relative overflow-hidden">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="font-display text-4xl font-bold mb-4">See the difference</h2>
+              <p className="text-muted-foreground text-lg">Sentinel doesn't just flag lines. It understands logic.</p>
             </div>
-            <CodeDiffViewer />
+            <div className="max-w-5xl mx-auto shadow-2xl rounded-xl overflow-hidden border border-border">
+              <CodeDiffViewer />
+            </div>
           </div>
         </section>
 
-        <CoreProposition />
-        <FeatureShowcase />
         <ComparisonTable />
         <TrustSection />
         <UseCasesSection />

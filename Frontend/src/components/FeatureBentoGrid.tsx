@@ -55,7 +55,7 @@ export const FeatureBentoGrid = () => {
 
                         <div className="relative z-20 h-full flex flex-col sm:flex-row gap-8 items-center">
                             <div className="flex-1 space-y-6">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-700">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-xs font-medium text-primary">
                                     <Zap className="w-3 h-3" />
                                     <span>Autonomous Fixes</span>
                                 </div>
@@ -74,9 +74,9 @@ export const FeatureBentoGrid = () => {
                                 </div>
                                 <div className="space-y-2 font-mono text-[10px]">
                                     <div className="text-red-400 line-through opacity-70">- const query = "SELECT * FROM users..."</div>
-                                    <div className="text-emerald-600 font-medium bg-emerald-50 w-full block rounded">+ const query = "SELECT * FROM users WHERE id = $1"</div>
+                                    <div className="text-primary font-medium bg-primary/5 w-full block rounded">+ const query = "SELECT * FROM users WHERE id = $1"</div>
                                     <div className="mt-3 flex gap-2">
-                                        <div className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-[9px] font-bold">TESTS PASS</div>
+                                        <div className="px-2 py-1 bg-primary/10 text-primary rounded text-[9px] font-bold">TESTS PASS</div>
                                         <div className="px-2 py-1 bg-blue-50 text-blue-600 rounded text-[9px]">SCANNING...</div>
                                     </div>
                                 </div>
@@ -96,7 +96,7 @@ export const FeatureBentoGrid = () => {
                                 {['SOC2 Type II', 'HIPAA', 'ISO 27001', 'GDPR'].map((std, i) => (
                                     <div key={std} className="flex items-center justify-between text-xs p-2 rounded bg-secondary/30 border border-secondary">
                                         <span className="text-foreground font-medium">{std}</span>
-                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
                                     </div>
                                 ))}
                             </div>

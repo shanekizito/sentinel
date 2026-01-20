@@ -1,120 +1,134 @@
-import { RefreshCw, Bot, CircuitBoard, ArrowRight, GitCommitHorizontal, CheckCircle2 } from "lucide-react";
+import { RefreshCw, Bot, Shield, ArrowRight, Terminal, Cpu, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const CoreProposition = () => {
   return (
-    <section className="py-32 bg-white relative overflow-hidden">
-      {/* Background Trace Lines */}
-      <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
+    <section className="py-24 bg-white relative border-t-2 border-gray-900">
+      {/* Structural Grid */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute left-[15%] top-0 bottom-0 w-px bg-gray-100" />
+        <div className="absolute right-[15%] top-0 bottom-0 w-px bg-gray-100" />
+      </div>
 
       <div className="container mx-auto px-6">
-        <div className="max-w-4xl mx-auto text-center mb-20">
-          <h2 className="font-display text-5xl font-bold mb-6 tracking-tight text-balance">
-            Sentinel Is Not a Tool You Remember to Run
-          </h2>
-          <p className="text-2xl text-muted-foreground leading-relaxed font-light">
-            You don’t “use” Sentinel. You <strong className="text-foreground font-medium">live with it.</strong>
-          </p>
+
+        {/* Section Header - User Benefit Focused */}
+        <div className="max-w-4xl mb-16">
+          <div className="border-l-4 border-primary pl-8 py-2">
+            <h2 className="font-display text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-4">
+              Security that fits
+              <br />
+              your workflow.
+            </h2>
+            <p className="text-xl text-gray-600 leading-relaxed font-light max-w-2xl">
+              Sentinel connects directly to your repo and works in the background. No dashboards to manage, no false alarms to triage.
+            </p>
+          </div>
         </div>
 
-        {/* Bento Grid Layout */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        {/* Grid System - Workflow Benefits */}
+        <div className="grid md:grid-cols-12 gap-px bg-gray-900 border-2 border-gray-900">
 
-          {/* Cell 1: Continuous (Large Span) */}
-          <div className="md:col-span-2 bg-[#F9F9F9] rounded-3xl p-10 border border-border relative overflow-hidden group hover:border-blue-200 transition-colors">
-            <div className="absolute top-0 right-0 p-10 opacity-10">
-              <RefreshCw className="w-64 h-64 text-blue-500" />
-            </div>
+          {/* Card 1: Context Awareness */}
+          <div className="md:col-span-8 bg-white p-10 relative">
+            <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-primary" />
 
-            <div className="relative z-10 h-full flex flex-col justify-between">
-              <div>
-                <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center mb-6">
-                  <RefreshCw className="w-7 h-7 text-blue-600" />
-                </div>
-                <h3 className="text-3xl font-bold mb-4">Continuous Infrastructure</h3>
-                <p className="text-xl text-muted-foreground leading-relaxed max-w-md">
-                  It runs on every git push, after AI generation, on schedules, and before deployment.
-                </p>
+            <div className="space-y-6">
+              <div className="w-12 h-12 bg-gray-900 flex items-center justify-center">
+                <Cpu className="w-6 h-6 text-white" />
               </div>
-
-              {/* Mock Git Timeline */}
-              <div className="mt-12 flex items-center gap-4 text-sm font-mono text-gray-500 bg-white/50 p-4 rounded-xl border border-gray-100 backdrop-blur-sm w-fit">
-                <div className="flex items-center gap-2">
-                  <GitCommitHorizontal className="w-4 h-4" />
-                  <span>feat: add user auth</span>
-                </div>
-                <ArrowRight className="w-4 h-4 text-gray-300" />
-                <div className="flex items-center gap-2 text-blue-600 font-bold">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Sentinel: Clean</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Cell 2: Autonomous (Tall) */}
-          <div className="md:row-span-2 bg-gradient-to-b from-gray-900 to-black rounded-3xl p-10 border border-gray-800 text-white relative overflow-hidden group">
-            <div className="absolute inset-0 bg-grid-white/[0.05]" />
-
-            <div className="relative z-10 flex flex-col h-full">
-              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center mb-6 backdrop-blur-md">
-                <Bot className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-3xl font-bold mb-4">Autonomous</h3>
-              <p className="text-gray-400 leading-relaxed mb-12">
-                Sentinel detects vulnerabilities, writes the fix, and generates regression tests. Humans approve. Sentinel does the work.
+              <h3 className="font-display text-2xl font-bold text-gray-900">Deep Code Understanding</h3>
+              <p className="text-lg text-gray-600 leading-relaxed max-w-md">
+                Most tools treat code like text. Sentinel understands how your application actually runs—tracking data flow across functions to find complex bugs others miss.
               </p>
 
-              {/* Bot Visual */}
-              <div className="mt-auto bg-gray-800/50 rounded-xl p-4 border border-gray-700 font-mono text-xs space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-gray-300">Scanning diff...</span>
+              {/* Benefit Stack */}
+              <div className="mt-8 space-y-3 font-mono text-sm">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                  <span className="text-gray-600">Context</span>
+                  <span className="text-gray-900 font-bold">Full Project Awareness</span>
                 </div>
-                <div className="text-emerald-400">{">"} SQL Injection found</div>
-                <div className="text-blue-400">{">"} Generating patch...</div>
-                <div className="text-purple-400">{">"} Verifying fix...</div>
-                <Link to="/automation" className="block text-center bg-white/10 hover:bg-white/20 py-2 rounded text-white font-bold transition-colors mt-4">
-                  View Automation Flow
-                </Link>
+                <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                  <span className="text-gray-600">Accuracy</span>
+                  <span className="text-gray-900 font-bold">No Noise / False Positives</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Speed</span>
+                  <span className="text-gray-900 font-bold">Instant Feedback</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Cell 3: Embedded (Standard) */}
-          <div className="md:col-span-2 bg-emerald-50/50 rounded-3xl p-10 border border-emerald-100 relative overflow-hidden group hover:bg-emerald-50 transition-colors">
-            <div className="absolute -right-20 -bottom-20 opacity-10">
-              <CircuitBoard className="w-80 h-80 text-emerald-600" />
+          {/* Card 2: AI + Verification */}
+          <div className="md:col-span-4 md:row-span-2 bg-white p-10 flex flex-col relative">
+            {/* Corner Accent */}
+            <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-primary" />
+
+            <div className="space-y-6 flex-1">
+              <div className="w-12 h-12 bg-gray-900 flex items-center justify-center">
+                <Bot className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-display text-2xl font-bold text-gray-900">Smart & Safe</h3>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Generative AI writes the fix. Mathematical logic proves it's safe. You get the best of both worlds.
+              </p>
             </div>
 
-            <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center">
-              <div className="flex-1">
-                <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-emerald-100 flex items-center justify-center mb-6">
-                  <CircuitBoard className="w-7 h-7 text-emerald-600" />
+            {/* AI Visual */}
+            <div className="mt-auto pt-8 border-t border-gray-100">
+              <div className="aspect-square bg-gray-50 border-2 border-gray-100 flex items-center justify-center relative overflow-hidden">
+                {/* Technical Grid Background */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:24px_24px]" />
+                <img src="/ai-brain.png" alt="AI Logic" className="w-3/4 opacity-90 relative z-10" />
+              </div>
+              <div className="mt-4 flex items-center gap-2 text-xs font-mono text-primary font-bold uppercase tracking-wider">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Logic Verified</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: Trusted Security */}
+          <div className="md:col-span-8 bg-white p-10 relative">
+            <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-primary" />
+
+            <div className="flex flex-col md:flex-row gap-10">
+              <div className="flex-1 space-y-6">
+                <div className="w-12 h-12 bg-gray-900 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-3xl font-bold mb-4">Embedded Reality</h3>
-                <p className="text-xl text-muted-foreground leading-relaxed">
-                  Security doesn't live outside the system it protects. Sentinel runs in CI, locally, or even offline within your VPC.
+                <h3 className="font-display text-2xl font-bold text-gray-900">Guaranteed Correctness</h3>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  We don't just "guess" at vulnerabilities. We prove them mathematically before alerting you. If Sentinel reports it, it's real.
                 </p>
-                <Link to="/security" className="inline-flex items-center gap-2 text-emerald-700 font-bold mt-6 hover:gap-3 transition-all">
-                  View Architecture <ArrowRight className="w-4 h-4" />
+                <Link to="/security" className="inline-flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wider border-b-2 border-gray-900 pb-1 hover:border-primary hover:text-primary transition-colors">
+                  How it works <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
 
-              {/* Graphic */}
-              <div className="w-full md:w-1/3 aspect-square bg-white rounded-2xl shadow-sm border border-emerald-100 flex items-center justify-center relative">
-                <div className="absolute inset-2 border-2 border-dashed border-emerald-100 rounded-xl" />
-                <div className="text-center">
-                  <div className="text-4xl font-black text-emerald-900/10">VPC</div>
-                  <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-2">Local Mode</div>
-                </div>
+              {/* Verification Engines */}
+              <div className="flex flex-col gap-px bg-gray-900 border-2 border-gray-900 min-w-[200px]">
+                {[
+                  { name: 'Syntax Check', status: 'Passed' },
+                  { name: 'Type Safety', status: 'Passed' },
+                  { name: 'Logic Proof', status: 'Verified' }
+                ].map((item) => (
+                  <div key={item.name} className="bg-white px-4 py-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-mono text-sm font-bold text-gray-900">{item.name}</span>
+                      <div className="w-2 h-2 bg-primary" />
+                    </div>
+                    <div className="text-xs text-gray-500">{item.status}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-        </div >
-      </div >
-    </section >
+        </div>
+      </div>
+    </section>
   );
 };
 

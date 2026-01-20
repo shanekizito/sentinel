@@ -37,7 +37,7 @@ const ThreatMonitor = () => {
             {/* Header - Light & Clean */}
             <div className="flex items-center justify-between px-2 pb-3">
                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-8 bg-emerald-500 rounded-full" />
+                    <div className="w-2 h-8 bg-primary rounded-full" />
                     <div>
                         <h3 className="text-sm font-bold text-foreground font-display tracking-tight leading-none">THREAT_INTEL</h3>
                         <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-mono">Realtime Global Feed</span>
@@ -47,7 +47,7 @@ const ThreatMonitor = () => {
                 <div className="flex gap-4 text-right">
                     <div>
                         <span className="block text-[10px] text-muted-foreground uppercase font-mono">Status</span>
-                        <span className="text-emerald-600 text-xs font-bold font-mono">ACTIVE</span>
+                        <span className="text-primary text-xs font-bold font-mono">ACTIVE</span>
                     </div>
                     <div>
                         <span className="block text-[10px] text-muted-foreground uppercase font-mono">Threats Blocked</span>
@@ -66,7 +66,7 @@ const ThreatMonitor = () => {
 
                     {/* Radar Scan Effect - Green */}
                     <div className="absolute inset-0 animate-[spin_8s_linear_infinite] opacity-20 pointer-events-none origin-center">
-                        <div className="w-full h-full border-r border-emerald-500/50 bg-gradient-to-l from-emerald-500/10 to-transparent" style={{ clipPath: 'polygon(50% 50%, 100% 0, 100% 50%)' }} />
+                        <div className="w-full h-full border-r border-primary/50 bg-gradient-to-l from-primary/10 to-transparent" style={{ clipPath: 'polygon(50% 50%, 100% 0, 100% 50%)' }} />
                     </div>
 
                     <AnimatePresence>
@@ -81,15 +81,15 @@ const ThreatMonitor = () => {
                                 style={{ left: `${threat.x}%`, top: `${threat.y}%` }}
                             >
                                 {/* Target Reticle Animation - High Contrast Green on Black */}
-                                <span className="absolute inline-flex h-full w-full rounded-full border border-emerald-400 opacity-75 animate-ping"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 top-1 left-1 bg-emerald-500 shadow-[0_0_10px_#10b981]"></span>
+                                <span className="absolute inline-flex h-full w-full rounded-full border border-primary opacity-75 animate-ping"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 top-1 left-1 bg-primary shadow-[0_0_10px_#00A676]"></span>
 
                                 {/* Label */}
                                 <motion.div
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: -20 }}
                                     exit={{ opacity: 0 }}
-                                    className="absolute left-1/2 -translate-x-1/2 -top-1 whitespace-nowrap bg-emerald-950/90 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[9px] text-emerald-400 font-mono font-bold pointer-events-none z-20 backdrop-blur-md"
+                                    className="absolute left-1/2 -translate-x-1/2 -top-1 whitespace-nowrap bg-primary/20 border border-primary/40 px-1.5 py-0.5 rounded text-[9px] text-primary font-mono font-bold pointer-events-none z-20 backdrop-blur-md"
                                 >
                                     {threat.type.toUpperCase()}
                                 </motion.div>
@@ -109,9 +109,9 @@ const ThreatMonitor = () => {
                         <div key={stat.label} className="p-4 flex items-center justify-between group hover:bg-white/5 transition-colors cursor-default">
                             <div>
                                 <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1 font-mono">{stat.label}</p>
-                                <p className="text-sm font-mono font-medium text-gray-300 group-hover:text-emerald-400 transition-colors">{stat.value}</p>
+                                <p className="text-sm font-mono font-medium text-gray-300 group-hover:text-primary transition-colors">{stat.value}</p>
                             </div>
-                            <stat.icon className="w-4 h-4 text-gray-700 group-hover:text-emerald-500 transition-colors" />
+                            <stat.icon className="w-4 h-4 text-gray-700 group-hover:text-primary transition-colors" />
                         </div>
                     ))}
                 </div>

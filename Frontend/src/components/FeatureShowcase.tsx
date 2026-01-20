@@ -1,159 +1,145 @@
-import { ReactNode } from "react";
-import { cn } from "@/lib/utils";
-import { Shield, Zap, Globe, GitPullRequest, Terminal, FileCode, CheckCircle2, Lock, Layout, Workflow, Server } from "lucide-react";
-
-// Tech Icon Container
-const TechIcon = ({ icon }: { icon: ReactNode }) => (
-    <div className="w-10 h-10 rounded-lg bg-[#F5F5F3] border border-border flex items-center justify-center text-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors duration-300">
-        {icon}
-    </div>
-);
+import { Zap, GitPullRequest, Globe, Lock, Terminal, FileCode, Server, Layout, Cpu, Shield, Clock } from "lucide-react";
 
 export const FeatureShowcase = () => {
     return (
-        <section className="py-24 relative overflow-hidden bg-[#FDFDFB]">
-            <div className="container mx-auto px-6 relative z-10 space-y-32">
+        <section className="py-24 bg-gray-50 border-y-2 border-gray-900 relative overflow-hidden">
+            {/* Grid Lines */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute left-0 right-0 top-1/2 h-px bg-gray-200" />
+            </div>
 
-                {/* Section 1: Auto-Remediation (Split Layout - NO CARD) */}
-                <div className="flex flex-col lg:flex-row items-center gap-16">
-                    <div className="flex-1 space-y-8">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-700">
-                            <Zap className="w-3 h-3" />
-                            <span>Autonomous Fixes</span>
+            <div className="container mx-auto px-6 relative z-10">
+
+                {/* Top Section - Workflow Focused */}
+                <div className="grid lg:grid-cols-2 gap-20 items-center mb-24">
+                    {/* Text */}
+                    <div className="space-y-10">
+                        <div className="space-y-6">
+                            <div className="inline-block border-l-4 border-primary pl-4">
+                                <div className="text-xs font-mono uppercase tracking-[0.2em] text-gray-500 mb-2">
+                                    Complete Automation
+                                </div>
+                            </div>
+                            <h2 className="font-display text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-[1.05]">
+                                We find it.
+                                <br />
+                                We fix it.
+                                <br />
+                                You merge.
+                            </h2>
                         </div>
 
-                        <h2 className="text-4xl lg:text-5xl font-display font-bold text-foreground leading-[1.1]">
-                            Sentinel writes the patch.<br /> You just merge.
-                        </h2>
-
-                        <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">
-                            Stop wasting engineering cycles on repetitive vulnerability fixes. Sentinel analyzes the context, generates a secure implementation, and opens a Pull Request instantly.
+                        <p className="text-xl text-gray-600 leading-relaxed max-w-lg font-light border-l-2 border-gray-200 pl-6">
+                            Stop spending hours chasing bugs. Sentinel finds vulnerabilities, writes the production-ready patch, and proves it breaks nothing.
                         </p>
 
-                        <div className="flex gap-4 pt-4">
-                            <div className="flex flex-col gap-1">
-                                <span className="text-2xl font-bold font-mono text-foreground">1.2s</span>
-                                <span className="text-xs text-muted-foreground uppercase tracking-wider">Mean Time to Fix</span>
-                            </div>
-                            <div className="w-[1px] h-12 bg-border" />
-                            <div className="flex flex-col gap-1">
-                                <span className="text-2xl font-bold font-mono text-foreground">94%</span>
-                                <span className="text-xs text-muted-foreground uppercase tracking-wider">Acceptance Rate</span>
-                            </div>
+                        {/* Process Steps - Simple Action Verbs */}
+                        <div className="space-y-px bg-gray-900 border-2 border-gray-900 max-w-md">
+                            {[
+                                { step: '01', action: 'Scan', desc: 'Checks every commit instantly' },
+                                { step: '02', action: 'Fix', desc: 'Auto-generates secure code' },
+                                { step: '03', action: 'Verify', desc: 'Ensures logic is preserved' },
+                                { step: '04', action: 'Deploy', desc: 'Ready for production' }
+                            ].map((item) => (
+                                <div key={item.step} className="bg-white px-6 py-3 flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <span className="font-mono text-xs text-gray-400">{item.step}</span>
+                                        <span className="font-bold text-sm text-gray-900">{item.action}</span>
+                                    </div>
+                                    <span className="text-xs text-gray-500">{item.desc}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Visual - Floating */}
-                    <div className="flex-1 w-full">
-                        <div className="relative rounded-xl border border-border bg-white shadow-2xl p-6 rotate-1 hover:rotate-0 transition-transform duration-700 max-w-lg mx-auto lg:mr-0">
-                            <div className="flex items-center gap-3 mb-6 border-b border-border pb-4">
-                                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                                    <GitPullRequest className="w-4 h-4 text-purple-600" />
-                                </div>
+                    {/* Image Frame */}
+                    <div className="relative">
+                        <div className="border-2 border-gray-900 p-4 bg-white">
+                            <div className="absolute -top-2 -left-2 w-16 h-16 border-t-4 border-l-4 border-primary" />
+                            <div className="absolute -bottom-2 -right-2 w-16 h-16 border-b-4 border-r-4 border-primary" />
+
+                            <div className="border border-gray-200 bg-gray-50">
+                                <img
+                                    src="/code-analysis.png"
+                                    alt="Automated Workflow"
+                                    className="w-full h-auto"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Floating Annotation */}
+                        <div className="absolute -bottom-6 -right-6 bg-white border-2 border-gray-900 px-6 py-4">
+                            <div className="flex items-center gap-3">
+                                <GitPullRequest className="w-5 h-5 text-gray-900" />
                                 <div>
-                                    <div className="text-sm font-bold text-foreground">fix/sql-injection-user-query</div>
-                                    <div className="text-xs text-muted-foreground font-mono">#42 • Open 12s ago by sentinel-bot</div>
+                                    <div className="text-sm font-bold text-gray-900">PR Ready</div>
+                                    <div className="text-xs text-gray-500 font-mono">1 Click Merge</div>
                                 </div>
-                            </div>
-
-                            <div className="space-y-3 font-mono text-xs">
-                                <div className="p-3 bg-red-50 text-red-700 rounded border border-red-100 line-through opacity-70">
-                                    - const query = "SELECT * FROM users WHERE id = " + req.id;
-                                </div>
-                                <div className="p-3 bg-emerald-50 text-emerald-700 rounded border border-emerald-100 font-medium">
-                                    + const query = "SELECT * FROM users WHERE id = $1";
-                                    <br />+ const values = [req.id];
-                                </div>
-                            </div>
-
-                            <div className="mt-6 flex justify-between items-center">
-                                <div className="flex -space-x-2">
-                                    {[1, 2, 3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white" />)}
-                                </div>
-                                <button className="px-4 py-2 bg-foreground text-background text-xs font-bold rounded hover:bg-foreground/90 transition-colors">
-                                    Review Changes
-                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Section 2: Compliance (List Layout - NO CARD) */}
-                <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl font-display font-bold text-foreground mb-4">Compliance on Autopilot</h2>
-                        <p className="text-muted-foreground">Map your security posture to global standards automatically.</p>
+                {/* Feature Grid - Benefits not Specs */}
+                <div className="max-w-6xl mx-auto">
+                    <div className="mb-12 border-l-4 border-gray-900 pl-8">
+                        <h3 className="font-display text-3xl font-bold text-gray-900 mb-2">Built for Scale</h3>
+                        <p className="text-gray-600">Enterprise-grade security that just works.</p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-x-12 gap-y-8">
+                    <div className="grid md:grid-cols-3 gap-px bg-gray-900 border-2 border-gray-900">
                         {[
-                            { title: "SOC2 Type II", desc: "Access controls, audit logging, and change management mapped.", status: "Ready" },
-                            { title: "HIPAA", desc: "PHI data flow monitoring and encryption verification.", status: "Verified" },
-                            { title: "ISO 27001", desc: "Information security management systems controls.", status: "Ready" },
-                            { title: "GDPR", desc: "Data privacy, consent management, and right-to-be-forgotten.", status: "Verified" },
-                        ].map((item) => (
-                            <div key={item.title} className="flex gap-4 items-start group">
-                                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-1">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                            {
+                                icon: <Clock className="w-5 h-5" />,
+                                title: "Blazing Fast",
+                                desc: "Scans thousands of files in milliseconds so you're never waiting.",
+                                tag: "Velocity"
+                            },
+                            {
+                                icon: <Shield className="w-5 h-5" />,
+                                title: "Future-Proof Encryption",
+                                desc: "Your data is protected by the highest standard of modern cryptography.",
+                                tag: "Security"
+                            },
+                            {
+                                icon: <Server className="w-5 h-5" />,
+                                title: "Global Scale",
+                                desc: "Works seamlessly whether you have 10 developers or 10,000.",
+                                tag: "Scalability"
+                            },
+                            {
+                                icon: <Globe className="w-5 h-5" />,
+                                title: "Zero Data Retention",
+                                desc: "We analyze your code and forget it. No IP ever stored on our servers.",
+                                tag: "Privacy"
+                            },
+                            {
+                                icon: <Lock className="w-5 h-5" />,
+                                title: "Private by Design",
+                                desc: "Analysis happens in isolated secure environments for total privacy.",
+                                tag: "Isolation"
+                            },
+                            {
+                                icon: <Terminal className="w-5 h-5" />,
+                                title: "Safe Testing",
+                                desc: "Every fix is tested in a sandboxed environment before it reaches you.",
+                                tag: "Quality"
+                            },
+                        ].map((feature, i) => (
+                            <div key={i} className="bg-white p-8 group hover:bg-gray-50 transition-colors">
+                                <div className="w-10 h-10 border-2 border-gray-900 flex items-center justify-center mb-4 group-hover:border-primary group-hover:bg-primary transition-colors">
+                                    <div className="text-gray-900 group-hover:text-white transition-colors">
+                                        {feature.icon}
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-foreground flex items-center gap-3">
-                                        {item.title}
-                                        <span className="px-2 py-0.5 rounded-full bg-gray-100 text-[10px] text-gray-500 font-mono uppercase tracking-wide border border-border">
-                                            {item.status}
-                                        </span>
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed group-hover:text-foreground transition-colors">
-                                        {item.desc}
-                                    </p>
+                                <div className="mb-2 text-[10px] uppercase tracking-wider text-primary font-bold">
+                                    {feature.tag}
                                 </div>
+                                <h4 className="font-bold text-lg mb-2 text-gray-900">{feature.title}</h4>
+                                <p className="text-sm text-gray-600 leading-relaxed">{feature.desc}</p>
                             </div>
                         ))}
                     </div>
-                </div>
-
-                {/* Section 3: Feature Clusters (Tight Icon Layout - NO BIG CARDS) */}
-                <div className="grid md:grid-cols-3 gap-8 pt-12 border-t border-border">
-                    {[
-                        {
-                            icon: <Globe className="w-5 h-5" />,
-                            title: "Cloud Security",
-                            desc: "Monitor IAM, S3, and API Gateways."
-                        },
-                        {
-                            icon: <Lock className="w-5 h-5" />,
-                            title: "Secret Detection",
-                            desc: "Stop API keys from leaking to prod."
-                        },
-                        {
-                            icon: <Terminal className="w-5 h-5" />,
-                            title: "CI/CD Integration",
-                            desc: "Native controls for GitHub & GitLab."
-                        },
-                        {
-                            icon: <FileCode className="w-5 h-5" />,
-                            title: "Custom Rules",
-                            desc: "Write policy as code with Python."
-                        },
-                        {
-                            icon: <Layout className="w-5 h-5" />,
-                            title: "Dependency Graph",
-                            desc: "Visualize how data flows through libs."
-                        },
-                        {
-                            icon: <Server className="w-5 h-5" />,
-                            title: "Container Scan",
-                            desc: "Vulnerability analysis for Docker/K8s."
-                        },
-                    ].map((feature, i) => (
-                        <div key={i} className="flex gap-4 group cursor-default">
-                            <TechIcon icon={feature.icon} />
-                            <div>
-                                <h4 className="font-bold text-foreground text-sm mb-1 group-hover:text-primary transition-colors">{feature.title}</h4>
-                                <p className="text-xs text-muted-foreground leading-relaxed pr-4">{feature.desc}</p>
-                            </div>
-                        </div>
-                    ))}
                 </div>
 
             </div>

@@ -45,7 +45,7 @@ const AutomationSection = () => {
             <div className="relative z-20 w-32 h-32 bg-white rounded-full border-4 border-blue-50 shadow-2xl flex flex-col items-center justify-center text-center">
               <Shield className="w-10 h-10 text-blue-600 mb-2" />
               <span className="font-bold text-xs tracking-wider">SENTINEL</span>
-              <span className="text-[10px] text-green-500 font-mono mt-1">● Active</span>
+              <span className="text-[10px] text-primary font-mono mt-1">● Active</span>
             </div>
 
             {/* Orbiting Satellite Nodes */}

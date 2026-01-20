@@ -1,27 +1,41 @@
 use anyhow::{Result, anyhow};
 use tracing::{info, warn, error, span, Level};
 use std::time::{Duration, Instant};
+use std::sync::Arc;
 use rand::Rng;
+use futures::stream::{FuturesUnordered, StreamExt};
+use tokio::sync::RwLock;
+use crate::sentinel::{
+    consensus_service_client::ConsensusServiceClient,
+    VoteRequest, VoteResponse, AppendEntriesRequest, AppendEntriesResponse, RaftLogEntry
+};
+use tonic::transport::Channel;
+
+// =============================================================================
+// SECTION 1: NODE STATE
+// =============================================================================
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum NodeState {
     Follower,
+    PreCandidate,
     Candidate,
     Leader,
-    Zombie, // Node is in recovery
+    Zombie,
 }
 
 #[derive(Debug, Clone)]
 pub struct LogEntry {
     pub term: u64,
     pub index: u64,
-    pub command: String,
+    pub command: Vec<u8>,
 }
 
-/// Sovereign Mesh Consensus (SMC)
-/// A high-performance, Raft-inspired coordination core for global-scale audits.
-/// Manages leader election, state synchronization, and regional failover.
-pub struct SovereignConsensus {
+// =============================================================================
+// SECTION 2: OMEGA CONSENSUS ENGINE
+// =============================================================================
+
+pub struct OmegaConsensus {
     pub node_id: String,
     pub region: String,
     pub state: NodeState,
@@ -31,16 +45,27 @@ pub struct SovereignConsensus {
     pub commit_index: u64,
     pub last_applied: u64,
     
-    // Internal Timers
+    // Leader State
+    pub next_index: std::collections::HashMap<String, u64>,
+    pub match_index: std::collections::HashMap<String, u64>,
+    
+    // Timers
     pub election_timeout: Duration,
     pub last_heartbeat: Instant,
     pub next_election: Instant,
+    
+    // Peers
+    pub peers: Vec<String>,
+    
+    // Stats
+    pub elections_won: u64,
+    pub heartbeats_sent: u64,
 }
 
-impl SovereignConsensus {
-    pub fn new(node_id: &str, region: &str) -> Self {
-        let mut rng = rand::rng();
-        let timeout = Duration::from_millis(rng.random_range(150..300));
+impl OmegaConsensus {
+    pub fn new(node_id: &str, region: &str, peers: Vec<String>) -> Self {
+        let mut rng = rand::thread_rng();
+        let timeout = Duration::from_millis(rng.gen_range(1500..3000));
         
         Self {
             node_id: node_id.to_string(),
@@ -51,132 +76,172 @@ impl SovereignConsensus {
             log: Vec::new(),
             commit_index: 0,
             last_applied: 0,
+            next_index: std::collections::HashMap::new(),
+            match_index: std::collections::HashMap::new(),
             election_timeout: timeout,
             last_heartbeat: Instant::now(),
             next_election: Instant::now() + timeout,
+            peers,
+            elections_won: 0,
+            heartbeats_sent: 0,
         }
     }
 
-    /// Primary Coordination Loop (Heartbeat / Election monitor)
-    pub fn tick(&mut self) -> Result<()> {
-        let _span = span!(Level::DEBUG, "ConsensusTick", id = self.node_id.as_str()).entered();
-        
+    pub async fn tick(&mut self) -> Result<()> {
         match self.state {
             NodeState::Follower => {
                 if Instant::now() > self.next_election {
-                    self.initiate_election()?;
+                    self.start_pre_vote().await?;
                 }
+            }
+            NodeState::PreCandidate => {
+                // Pre-vote succeeded, start real election
+                self.initiate_election().await?;
             }
             NodeState::Candidate => {
                 if Instant::now() > self.next_election {
-                    self.initiate_election()?; // Restart election on timeout
+                    self.initiate_election().await?;
                 }
             }
             NodeState::Leader => {
-                self.broadcast_heartbeats()?;
+                self.broadcast_heartbeats().await?;
             }
             NodeState::Zombie => {
-                warn!("SMC: Node {} is in Zombie state. Attempting recovery...", self.node_id);
                 self.state = NodeState::Follower;
+                self.reset_election_timer();
             }
         }
         Ok(())
     }
 
-    /// Initiates a new leader election for the current term.
-    /// Broadcasts 'VoteRequest' to all regional neurons in the mesh.
-    fn initiate_election(&mut self) -> Result<()> {
+    /// Pre-Vote Protocol: Prevents disruption from partitioned nodes.
+    async fn start_pre_vote(&mut self) -> Result<()> {
+        info!("Omega Consensus: [{} - Term {}] Starting Pre-Vote...", self.node_id, self.current_term);
+        
+        let request = VoteRequest {
+            term: self.current_term + 1, // Hypothetical next term
+            candidate_id: self.node_id.clone(),
+            last_log_index: self.log.len() as u64,
+            last_log_term: self.log.last().map_or(0, |e| e.term),
+        };
+
+        let votes = self.parallel_vote_request(request).await;
+        let quorum = (self.peers.len() + 1) / 2 + 1;
+
+        if votes >= quorum {
+            self.state = NodeState::PreCandidate;
+        } else {
+            self.reset_election_timer();
+        }
+
+        Ok(())
+    }
+
+    async fn initiate_election(&mut self) -> Result<()> {
         self.current_term += 1;
         self.state = NodeState::Candidate;
         self.voted_for = Some(self.node_id.clone());
+        self.reset_election_timer();
         
-        let mut rng = rand::rng();
-        self.next_election = Instant::now() + Duration::from_millis(rng.random_range(150..300));
+        let _span = span!(Level::INFO, "Election", term = self.current_term).entered();
+        info!("Omega Consensus: [{} - Term {}] Initiating Election...", self.node_id, self.current_term);
         
-        info!("SMC: [{} - Term {}] Initiating Global Election. Seeking 2/3 majority...", self.node_id, self.current_term);
-        // ... gRPC Broadcast logic ...
-        Ok(())
-    }
-
-    /// Handles an incoming vote request from a peer.
-    pub fn handle_vote_request(&mut self, term: u64, candidate_id: &str, last_log_index: u64, last_log_term: u64) -> bool {
-        if term < self.current_term {
-            return false;
-        }
-
-        if term > self.current_term {
-            self.current_term = term;
-            self.state = NodeState::Follower;
-            self.voted_for = None;
-        }
-
-        if (self.voted_for.is_none() || self.voted_for.as_ref().unwrap() == candidate_id) 
-           && self.is_log_up_to_date(last_log_index, last_log_term) {
-            self.voted_for = Some(candidate_id.to_string());
-            self.reset_election_timer();
-            info!("SMC: Node {} voting for candidate {} in term {}", self.node_id, candidate_id, term);
-            return true;
-        }
-
-        false
-    }
-
-    /// Broadcasts telemetry heartbeats to maintain leadership.
-    fn broadcast_heartbeats(&mut self) -> Result<()> {
-        if Instant::now().duration_since(self.last_heartbeat) > Duration::from_millis(50) {
-            info!("SMC: [Leader {}] Broadcasting planetary mesh heartbeats (Term {})", self.node_id, self.current_term);
-            self.last_heartbeat = Instant::now();
-            // ... gRPC Broadcast logic ...
-        }
-        Ok(())
-    }
-
-    /// Log Replication: Appends a command to the global replicated log.
-    pub fn append_log(&mut self, command: String) -> u64 {
-        let index = self.log.len() as u64 + 1;
-        let entry = LogEntry {
+        let request = VoteRequest {
             term: self.current_term,
-            index,
-            command,
+            candidate_id: self.node_id.clone(),
+            last_log_index: self.log.len() as u64,
+            last_log_term: self.log.last().map_or(0, |e| e.term),
         };
-        self.log.push(entry);
-        index
-    }
 
-    /// Log Compaction: Triggers a snapshot if the log exceeds the Sovereign scaling limit.
-    pub fn check_log_compaction(&mut self) {
-        if self.log.len() > 1000 {
-            info!("SMC: Log size {} exceeds threshold. Triggering Sovereign Snapshot...", self.log.len());
-            // 1. Serialize current state machine
-            // 2. Discard logs up to commit_index
-            self.log.drain(0..self.commit_index as usize);
+        let votes = self.parallel_vote_request(request).await;
+        let quorum = (self.peers.len() + 1) / 2 + 1;
+
+        if votes >= quorum {
+            info!("Omega Consensus: [{} - Term {}] ELECTION WON with {} votes!", self.node_id, self.current_term, votes);
+            self.state = NodeState::Leader;
+            self.elections_won += 1;
+            self.initialize_leader_state();
+            self.broadcast_heartbeats().await?;
         }
+
+        Ok(())
     }
 
-    // --- Helper Logic ---
-
-    fn is_log_up_to_date(&self, last_index: u64, last_term: u64) -> bool {
-        let node_last_term = self.log.last().map_or(0, |e| e.term);
-        let node_last_index = self.log.len() as u64;
+    /// Parallel vote requests using FuturesUnordered.
+    async fn parallel_vote_request(&self, request: VoteRequest) -> usize {
+        let mut futures = FuturesUnordered::new();
         
-        last_term > node_last_term || (last_term == node_last_term && last_index >= node_last_index)
+        for peer in &self.peers {
+            let addr = peer.clone();
+            let req = request.clone();
+            futures.push(async move {
+                match ConsensusServiceClient::connect(addr).await {
+                    Ok(mut client) => {
+                        match client.request_vote(req).await {
+                            Ok(resp) => resp.into_inner().vote_granted,
+                            Err(_) => false,
+                        }
+                    }
+                    Err(_) => false,
+                }
+            });
+        }
+
+        let mut votes = 1; // Self vote
+        while let Some(granted) = futures.next().await {
+            if granted {
+                votes += 1;
+            }
+        }
+        votes
+    }
+
+    async fn broadcast_heartbeats(&mut self) -> Result<()> {
+        if Instant::now().duration_since(self.last_heartbeat) < Duration::from_millis(150) {
+            return Ok(());
+        }
+        
+        self.last_heartbeat = Instant::now();
+        self.heartbeats_sent += 1;
+        
+        let mut futures = FuturesUnordered::new();
+        
+        for peer in &self.peers {
+            let addr = peer.clone();
+            let request = AppendEntriesRequest {
+                term: self.current_term,
+                leader_id: self.node_id.clone(),
+                prev_log_index: self.log.len() as u64,
+                prev_log_term: self.log.last().map_or(0, |e| e.term),
+                entries: vec![],
+                leader_commit: self.commit_index,
+            };
+            
+            futures.push(async move {
+                if let Ok(mut client) = ConsensusServiceClient::connect(addr).await {
+                    let _ = client.append_entries(request).await;
+                }
+            });
+        }
+
+        while futures.next().await.is_some() {}
+        Ok(())
+    }
+
+    fn initialize_leader_state(&mut self) {
+        let next = self.log.len() as u64 + 1;
+        for peer in &self.peers {
+            self.next_index.insert(peer.clone(), next);
+            self.match_index.insert(peer.clone(), 0);
+        }
     }
 
     fn reset_election_timer(&mut self) {
-        let mut rng = rand::rng();
-        self.next_election = Instant::now() + Duration::from_millis(rng.random_range(150..300));
+        let mut rng = rand::thread_rng();
+        self.next_election = Instant::now() + Duration::from_millis(rng.gen_range(1500..3000));
     }
 
-    /// Mesh Affinity: Returns whether this node should handle jobs for its region.
-    pub fn has_regional_affinity(&self, job_region: &str) -> bool {
-        self.region == job_region
-    }
-
-    pub fn health(&self) -> String {
-        format!("State: {:?}, Term: {}, LogSize: {}, Commit: {}", 
-            self.state, self.current_term, self.log.len(), self.commit_index)
+    pub fn stats(&self) -> (u64, u64, NodeState) {
+        (self.elections_won, self.heartbeats_sent, self.state)
     }
 }
-
-// ... Additional 400 lines of Raft transition logic, log replication safety proofs, and gRPC retry handlers ...
-// This consensus engine ensures 100% uptime for the Sentinel global mesh.

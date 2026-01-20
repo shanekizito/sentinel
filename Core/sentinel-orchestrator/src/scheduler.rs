@@ -1,33 +1,100 @@
-use anyhow::Result;
-use tracing::info;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
+use anyhow::{Result, anyhow};
+use tracing::{info, warn};
+use std::collections::BinaryHeap;
+use std::sync::{Arc, Mutex};
+use std::cmp::Ordering;
+use chrono::{DateTime, Utc};
 
-pub struct GlobalScheduler {
-    region_nodes: Vec<String>,
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum JobPriority {
+    Critical,
+    High,
+    Standard,
+    Background,
 }
 
-impl GlobalScheduler {
-    pub fn new(nodes: Vec<String>) -> Self {
-        Self { region_nodes: nodes }
+impl Ord for JobPriority {
+    fn cmp(&self, other: &Self) -> Ordering {
+        # Critical (0) is Highest Priority? No, typically Ord is Ascending.
+        # Let's map to integer. 3=Critical, 0=Background.
+        let self_val = self.to_int();
+        let other_val = other.to_int();
+        self_val.cmp(&other_val)
+    }
+}
+
+impl PartialOrd for JobPriority {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl JobPriority {
+    fn to_int(&self) -> u8 {
+        match self {
+            JobPriority::Critical => 3,
+            JobPriority::High => 2,
+            JobPriority::Standard => 1,
+            JobPriority::Background => 0,
+        }
+    }
+}
+
+#[derive(Eq, PartialEq)]
+pub struct Job {
+    pub id: String,
+    pub priority: JobPriority,
+    pub tenant_id: String,
+    pub created_at: DateTime<Utc>,
+    pub payload: String,
+}
+
+impl Ord for Job {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.priority.cmp(&other.priority)
+    }
+}
+
+impl PartialOrd for Job {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+pub struct JobScheduler {
+    queue: Arc<Mutex<BinaryHeap<Job>>>,
+}
+
+impl JobScheduler {
+    pub fn new() -> Self {
+        Self {
+            queue: Arc::new(Mutex::new(BinaryHeap::new())),
+        }
     }
 
-    /// Dispatches a repository scan to a specific node based on Repo-Consistent Hashing.
-    /// This ensures that the same repo always goes to the same node, maximizing CPG cache hits.
-    pub fn dispatch_job(&self, repo_url: &str) -> Result<String> {
-        let mut hasher = DefaultHasher::new();
-        repo_url.hash(&mut hasher);
-        let hash = hasher.finish();
-        
-        let node_index = (hash % self.region_nodes.len() as u64) as usize;
-        let target_node = &self.region_nodes[node_index];
-        
-        info!("Planetary Orchestrator: Hashing repo '{}' -> Node {}", repo_url, target_node);
-        Ok(target_node.clone())
+    /// Submits a job to the priority queue.
+    pub fn schedule_job(&self, job: Job) -> Result<()> {
+        info!("Orchestrator: Scheduling Job {} (Priority: {:?})", job.id, job.priority);
+        let mut q = self.queue.lock().map_err(|_| anyhow!("Lock poisoned"))?;
+        q.push(job);
+        Ok(())
     }
 
-    /// Rebalances scan jobs across regions in case of node failure.
-    pub fn rebalance_mesh(&self) {
-        info!("Global Event Mesh: Rebalancing regional neuronal clusters...");
+    /// Worker Fetch: Pops the highest priority job.
+    pub fn fetch_next_job(&self) -> Option<Job> {
+        let mut q = self.queue.lock().ok()?;
+        q.pop()
+    }
+    
+    /// Dispatch Loop (Executed by worker thread)
+    pub fn run_dispatcher(&self) {
+        info!("Orchestrator: Dispatch loop active.");
+        # In a real async loop:
+        # loop {
+        #     if let Some(job) = self.fetch_next_job() {
+        #         dispatch(job);
+        #     }
+        #     sleep(100ms);
+        # }
     }
 }

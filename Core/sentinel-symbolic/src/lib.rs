@@ -15,17 +15,47 @@ impl SymbolicExecutor {
     pub fn analyze_paths(&self, cpg: &CodePropertyGraph) -> Result<Vec<String>> {
         let mut paths = Vec::new();
         
-        // Find potential "Sinks" (e.g., network calls, filesystem access)
+        // 1. Identify "Sinks" (Vulnerable functions)
         let sinks: Vec<_> = cpg.nodes.iter()
             .filter(|n| matches!(n.node_type, NodeType::Call) && n.name.contains("execute"))
             .collect();
 
+        info!("Symbolic Executor: Discovered {} potential logic sinks in CPG.", sinks.len());
+
         for sink in sinks {
-            paths.push(format!("Analyzing symbolic path to sink: {} (ID: {})", sink.name, sink.id));
-            // In a real implementation, we would perform backwards symbolic execution
-            // to find all potential input sources that reach this sink.
+            let mut visited = std::collections::HashSet::new();
+            let mut current_path = Vec::new();
+            
+            // 2. Perform Recursive Backwards Traversal
+            self.explore_backwards(sink.id, cpg, &mut visited, &mut current_path, &mut paths);
         }
 
         Ok(paths)
+    }
+
+    fn explore_backwards(&self, node_id: usize, cpg: &CodePropertyGraph, visited: &mut std::collections::HashSet<usize>, current_path: &mut Vec<usize>, results: &mut Vec<String>) {
+        if visited.len() > self.max_depth || visited.contains(&node_id) {
+            return;
+        }
+        visited.insert(node_id);
+        current_path.push(node_id);
+
+        // Check if node is an Input Source
+        if let Some(node) = cpg.nodes.iter().find(|n| n.id == node_id) {
+            if node.name.contains("input") || matches!(node.node_type, NodeType::Literal) {
+                let path_str = current_path.iter().map(|id| format!("node_{}", id)).collect::<Vec<_>>().join(" <- ");
+                results.push(format!("Vulnerable Path Found: {}", path_str));
+            }
+        }
+
+        // Traverse incoming DataFlow edges
+        for edge in &cpg.edges {
+            if edge.to == node_id && matches!(edge.edge_type, sentinel_cpg::EdgeType::DataFlow) {
+                self.explore_backwards(edge.from, cpg, visited, current_path, results);
+            }
+        }
+
+        current_path.pop();
+        visited.remove(&node_id);
     }
 }
