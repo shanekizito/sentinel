@@ -90,10 +90,10 @@ struct HnswNode {
 }
 
 // =============================================================================
-// SECTION 3: HNSW INDEX (OMEGA EDITION)
+// SECTION 3: HNSW INDEX (SEMANTIC RAG HUB)
 // =============================================================================
 #[derive(Serialize, Deserialize)]
-pub struct OmegaHnswIndex {
+pub struct SemanticRagHub {
     dimension: usize,
     max_elements: usize,
     nodes: HashMap<usize, HnswNode>,
@@ -114,7 +114,7 @@ impl PartialOrd for DistNode {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) }
 }
 
-impl OmegaHnswIndex {
+impl SemanticRagHub {
     pub fn new(dimension: usize) -> Self {
         Self {
             dimension,
@@ -124,6 +124,33 @@ impl OmegaHnswIndex {
             max_level: 0,
             pq: ProductQuantizer::new(dimension, 32, 256), // 32 subvectors, 256 centroids
         }
+    }
+
+    pub fn augment_prompt(&self, prompt: &str, context: &[(String, f32)]) -> String {
+        let mut augmented = format!("{}\n\nContext from Sovereign Knowledge Base:\n", prompt);
+        for (payload, dist) in context {
+            augmented.push_str(&format!("- {} (Dist: {:.2})\n", payload, dist));
+        }
+        augmented
+    }
+
+    pub async fn retrieve_context(&self, query_vector: &[f32]) -> Result<Vec<(String, f32)>> {
+        self.retrieve_context_top_k(query_vector, 5).await
+    }
+
+    pub async fn retrieve_context_top_k(&self, query_vector: &[f32], top_k: usize) -> Result<Vec<(String, f32)>> {
+        info!("Omega HNSW: Serving billion-scale inference query...");
+        if let Some(ep) = self.entry_point {
+            let mut curr_ep = ep;
+            for l in (1..=self.max_level).rev() {
+                curr_ep = self.search_layer_single(query_vector, curr_ep, l);
+            }
+            let results = self.search_layer(query_vector, curr_ep, top_k * 2, 0);
+            return Ok(results.into_iter().take(top_k).map(|dn| {
+                (self.nodes[&dn.id].payload.clone(), dn.dist)
+            }).collect());
+        }
+        Ok(vec![])
     }
 
     fn assign_level(&self) -> usize {
@@ -245,21 +272,6 @@ impl OmegaHnswIndex {
 
     fn asymmetric_dist(&self, query: &[f32], code: &[u8]) -> f32 {
         self.pq.asymmetric_distance(query, code)
-    }
-
-    pub async fn retrieve_context(&self, query_vector: &[f32], top_k: usize) -> Result<Vec<(String, f32)>> {
-        info!("Omega HNSW: Serving billion-scale inference query...");
-        if let Some(ep) = self.entry_point {
-            let mut curr_ep = ep;
-            for l in (1..=self.max_level).rev() {
-                curr_ep = self.search_layer_single(query_vector, curr_ep, l);
-            }
-            let results = self.search_layer(query_vector, curr_ep, top_k * 2, 0);
-            return Ok(results.into_iter().take(top_k).map(|dn| {
-                (self.nodes[&dn.id].payload.clone(), dn.dist)
-            }).collect());
-        }
-        Ok(vec![])
     }
 
     pub fn save(&self, path: &str) -> Result<()> {

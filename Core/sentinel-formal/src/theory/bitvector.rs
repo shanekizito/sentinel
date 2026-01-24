@@ -1,5 +1,5 @@
-use anyhow::Result;
-use tracing::info;
+// Unused anyhow and tracing removed
+
 
 /// Translates CPG operations into SMT-LIB Bitvector (BV) theory constraints.
 /// Essential for verifying low-level memory safety and arithmetic overflows.
@@ -14,7 +14,7 @@ impl BitvectorTranslator {
     }
 
     /// Generates a proof goal for an unsigned overflow check.
-    pub fn generate_overflow_goal(&self, var_a: &str, var_b: &str, result: &str) -> String {
+    pub fn generate_overflow_goal(&self, var_a: &str, var_b: &str, _result: &str) -> String {
         format!("(assert (bvadd-no-overflow {} {}))", var_a, var_b)
     }
 

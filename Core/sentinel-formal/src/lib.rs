@@ -4,8 +4,9 @@ pub mod race_coordinator;
 pub mod ssa;
 pub mod theory;
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use sentinel_cpg::{CodePropertyGraph, EdgeType, NodeType};
+use tracing::{info, warn};
 
 pub struct SmtGenerator {
     constraints: Vec<String>,

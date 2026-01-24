@@ -1,3 +1,11 @@
 testRES/
 Fleexd_Demo/
 Frontend/
+
+__pycache__/
+*.pyc
+
+target/
+Core/target/
+
+Core/target_alt/

@@ -7,4 +7,8 @@ edition.workspace = true
 anyhow.workspace = true
 tracing.workspace = true
 sentinel-cpg = { path = "../sentinel-cpg" }
-# Placeholder for Z3 binding if needed, otherwise we generate SMT-LIB
+tokio = { version = "1", features = ["full"] }
+dashmap = "5.5"
+parking_lot = "0.12"
+crossbeam = "0.8"
+rayon = "1.8"

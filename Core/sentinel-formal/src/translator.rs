@@ -1,5 +1,4 @@
-use anyhow::Result;
-use sentinel_cpg::{CodePropertyGraph, EdgeType, NodeType, Node};
+use sentinel_cpg::CodePropertyGraph;
 
 pub struct SmtTranslator {
     ctx_name: String,
@@ -12,7 +11,7 @@ impl SmtTranslator {
 
     /// Translates a suspicious data flow path into a Z3-compatible SMT-LIB script.
     /// The script attempts to find if there's ANY input that can reach a sink without sanitization.
-    pub fn translate_path_to_smt(&self, path: &[u32], cpg: &CodePropertyGraph) -> String {
+    pub fn translate_path_to_smt(&self, path: &[u64], cpg: &CodePropertyGraph) -> String {
         let mut smt = String::new();
         smt.push_str("(set-logic QF_BV)\n"); // Bit-vector logic for precise modeling
         smt.push_str(&format!("; Context: {}\n", self.ctx_name));

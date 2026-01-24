@@ -7,7 +7,7 @@ pub struct TaintTracker;
 impl TaintTracker {
     /// Performs inter-procedural taint tracking on the CPG.
     /// Returns a list of paths from Sources to Sinks that lack proper sanitization.
-    pub fn find_tainted_flows(cpg: &CodePropertyGraph) -> Vec<Vec<u32>> {
+    pub fn find_tainted_flows(cpg: &CodePropertyGraph) -> Vec<Vec<u64>> {
         let mut violations = Vec::new();
         
         let sources: Vec<&Node> = cpg.nodes.iter()
@@ -20,14 +20,14 @@ impl TaintTracker {
             .collect();
 
         for source in sources {
-            let flows = self::trace_flow(source.id, &sinks, cpg);
+            let flows = Self::trace_flow(source.id, &sinks, cpg);
             violations.extend(flows);
         }
 
         violations
     }
 
-    fn trace_flow(start_id: u32, sinks: &[&Node], cpg: &CodePropertyGraph) -> Vec<Vec<u32>> {
+    fn trace_flow(start_id: u64, sinks: &[&Node], cpg: &CodePropertyGraph) -> Vec<Vec<u64>> {
         let mut paths = Vec::new();
         let mut queue = VecDeque::new();
         queue.push_back(vec![start_id]);

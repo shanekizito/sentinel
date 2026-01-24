@@ -3,7 +3,7 @@ use tracing::{info, debug};
 use sentinel_cpg::{CodePropertyGraph, Node, NodeType};
 
 pub struct SymbolicPath {
-    pub nodes: Vec<u32>,
+    pub nodes: Vec<u64>,
     pub constraints: Vec<String>,
 }
 
@@ -12,7 +12,7 @@ pub struct SymbolicWalker;
 impl SymbolicWalker {
     /// Recursively explores execution paths backwards from a sensitive sink
     /// to find all possible input sources.
-    pub fn explore_backwards(&self, sink_id: u32, cpg: &CodePropertyGraph) -> Result<Vec<SymbolicPath>> {
+    pub fn explore_backwards(&self, sink_id: u64, _cpg: &CodePropertyGraph) -> Result<Vec<SymbolicPath>> {
         info!("Dimension 3: Oracle is exploring symbolic paths for sink {}...", sink_id);
         
         let mut paths = Vec::new();

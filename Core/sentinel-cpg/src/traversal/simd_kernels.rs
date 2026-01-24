@@ -32,7 +32,7 @@ impl SimdTraverser {
         let k_mask = _mm512_int2mask(mask as i32);
         
         // Load the edge offsets into a ZMM register
-        let v_offsets = _mm512_loadu_si512(offsets.as_ptr() as *const i32);
+        let v_offsets = _mm512_loadu_si512(offsets.as_ptr() as *const __m512i);
         
         // GATHER: Load 16 disparate u32 values from the graph in one instruction cycle
         // This is where mmap-alignment and page-alignment pay off (minimizing page faults)
@@ -45,7 +45,7 @@ impl SimdTraverser {
         );
         
         let mut results = [0u32; 16];
-        _mm512_storeu_si512(results.as_mut_ptr() as *mut i32, v_results);
+        _mm512_storeu_si512(results.as_mut_ptr() as *mut __m512i, v_results);
         
         self.processed_edges.fetch_add(16, std::sync::atomic::Ordering::Relaxed);
         results
@@ -55,11 +55,11 @@ impl SimdTraverser {
     /// Uses AVX-512 conflict detection to identify unique nodes in a batch.
     #[target_feature(enable = "avx512cd")]
     pub unsafe fn detect_conflicts_avx512(&self, node_batch: [u32; 16]) -> u16 {
-        let v_nodes = _mm512_loadu_si512(node_batch.as_ptr() as *const i32);
+        let v_nodes = _mm512_loadu_si512(node_batch.as_ptr() as *const __m512i);
         let v_conflicts = _mm512_conflict_epi32(v_nodes);
         
         let mut conflicts = [0u32; 16];
-        _mm512_storeu_si512(conflicts.as_mut_ptr() as *mut i32, v_conflicts);
+        _mm512_storeu_si512(conflicts.as_mut_ptr() as *mut __m512i, v_conflicts);
         
         // Convert the conflict results to a mask for the core engine
         _mm512_testn_epi32_mask(v_conflicts, v_conflicts)
@@ -67,7 +67,7 @@ impl SimdTraverser {
 
     /// SIMD-Accelerated Bitset Updates
     /// Marks 512 nodes as 'Visited' in a single Atomic OR cycle.
-    pub unsafe fn mark_visited_512(&self, bitset_ptr: *mut u64, bit_offsets: [u32; 8]) {
+    pub unsafe fn mark_visited_512(&self, _bitset_ptr: *mut u64, _bit_offsets: [u32; 8]) {
         // Marking logic for high-concurrency traversals
         // In a real product, this would use _mm512_mask_storeu_epi64 with atomic guarantees
         info!("SSAK: Marking 512 bits in global visited-set...");
@@ -94,7 +94,7 @@ impl SimdTraverser {
 
     /// Vectorized Path Compression (Research Grade)
     /// Shrinks transitive paths in the PDG to speed up taint flow reachability queries.
-    pub unsafe fn compress_paths_simd(&self, path_buffer: *mut u32, length: usize) {
+    pub unsafe fn compress_paths_simd(&self, _path_buffer: *mut u32, _length: usize) {
         info!("SSAK: Compressing PDG transitive paths using AVX-512...");
         // 512-bit vectorization of path lookup logic
     }
@@ -103,12 +103,12 @@ impl SimdTraverser {
     /// Only propagates taint across edges that meet SMT-proven constraints.
     pub unsafe fn propagate_taint_masked(&self, source_taint: [u32; 16], constraint_mask: u16) -> [u32; 16] {
         let k_mask = _mm512_int2mask(constraint_mask as i32);
-        let v_source = _mm512_loadu_si512(source_taint.as_ptr() as *const i32);
+        let v_source = _mm512_loadu_si512(source_taint.as_ptr() as *const __m512i);
         
         let v_target = _mm512_maskz_mov_epi32(k_mask, v_source);
         
         let mut results = [0u32; 16];
-        _mm512_storeu_si512(results.as_mut_ptr() as *mut i32, v_target);
+        _mm512_storeu_si512(results.as_mut_ptr() as *mut __m512i, v_target);
         results
     }
 

@@ -47,7 +47,14 @@ impl MmapEngine {
                 .context("Failed to map memory")?
         };
 
-        let page_size = unsafe { libc::sysconf(libc::_SC_PAGESIZE) as usize };
+        let page_size = if cfg!(unix) {
+            #[cfg(unix)]
+            unsafe { libc::sysconf(libc::_SC_PAGESIZE) as usize }
+            #[cfg(not(unix))]
+            4096
+        } else {
+            4096
+        };
         info!("SPME: Initialized Sovereign Mmap Engine. Page Size: {} bytes, Capacity: {} GB", page_size, size_gb);
 
         Ok(Self {
@@ -90,7 +97,7 @@ impl MmapEngine {
 
     /// Predictive Prefetching: Hints the OS to load a range of pages into the page cache.
     /// This is used by the 'Sovereign Loop' to warm memory before a BFS traversal reaches a node.
-    pub fn prefetch_range(&self, offset: usize, length: usize) {
+    pub fn prefetch_range(&self, _offset: usize, _length: usize) {
         #[cfg(unix)]
         unsafe {
             let ptr = self.mmap.as_ptr().add(offset);
@@ -127,7 +134,7 @@ impl MmapEngine {
 
     /// Implements a "Page-Stealing" protocol for distributed memory management.
     /// Allows the orchestrator to request memory release from under-utilized regions.
-    pub fn reclaim_pages(&self, start_offset: usize, length: usize) {
+    pub fn reclaim_pages(&self, _start_offset: usize, _length: usize) {
         #[cfg(unix)]
         unsafe {
             let ptr = self.mmap.as_ptr().add(start_offset);
@@ -162,7 +169,8 @@ impl MmapEngine {
     pub fn create_cow_snapshot(&self) -> Result<MmapMut> {
         info!("SPME: Creating Atomic COW Snapshot for Raft Log Replication...");
         // This would use OS-level fork or memfd_create
-        Ok(unsafe { MmapOptions::new().map_mut_copy(&self.mmap.as_ptr() as *const _ as *const std::fs::File)? }) // Mocking the file
+        // In a production environment, this would use OS-level COW features.
+        Err(anyhow::anyhow!("COW snapshots not implemented for this platform"))
     }
 }
 

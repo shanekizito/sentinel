@@ -19,7 +19,7 @@ impl<'a> FieldSensitiveTracker<'a> {
     pub fn trace_field_flow(&self, start_node_id: u64, target_field: &str) -> Result<Vec<Vec<u64>>> {
         tracing::info!("Field-Sensitive: Tracing flow for field '{}' from node {}...", target_field, start_node_id);
         
-        let mut results = Vec::new();
+        let results = Vec::new();
         let mut queue = VecDeque::new();
         queue.push_back(vec![start_node_id]);
         

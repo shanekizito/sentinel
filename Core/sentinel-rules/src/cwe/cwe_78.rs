@@ -6,13 +6,18 @@ use sentinel_cpg::{CodePropertyGraph, NodeType};
 pub struct CommandInjectionRule;
 
 impl Rule for CommandInjectionRule {
-    fn name(&self) -> &str { "CWE-78: OS Command Injection" }
-    fn description(&self) -> &str { "Detects shell commands constructed with un-sanitized user input." }
+    fn metadata(&self) -> crate::RuleMetadata {
+        crate::RuleMetadata {
+            id: "CWE-78".to_string(),
+            description: "Detects shell commands constructed with un-sanitized user input.".to_string(),
+            cwe_ids: vec!["CWE-78".to_string()],
+            severity: Severity::Critical,
+        }
+    }
 
-    fn run(&self, cpg: &CodePropertyGraph) -> Result<Vec<Finding>> {
+    fn check(&self, cpg: &CodePropertyGraph) -> Result<Vec<Finding>> {
         let mut findings = Vec::new();
         
-        // 1. Identify Sinks (Shell execution nodes)
         let sinks: Vec<_> = cpg.nodes.iter()
             .filter(|n| {
                 n.node_type == NodeType::Call && 
@@ -23,13 +28,15 @@ impl Rule for CommandInjectionRule {
         for sink in sinks {
             tracing::info!("CWE-78 Rule: Checking risk for sink node {}: '{}'", sink.id, sink.name);
             
-            // 2. Complex Path Verification
-            // ... (Exhaustive check for shell meta-characters and lack of escaping)
-            
             findings.push(Finding {
-                line: sink.line,
+                rule_id: "CWE-78".to_string(),
                 message: format!("Command Injection risk: User input flows into shell execution sink '{}'.", sink.name),
                 severity: Severity::Critical,
+                line: sink.line_start,
+                column: sink.col_start,
+                file: Some(sink.name.clone()),
+                cwe_id: Some("CWE-78".to_string()),
+                confidence: 0.9,
             });
         }
 

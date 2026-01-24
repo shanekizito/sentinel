@@ -6,13 +6,18 @@ use sentinel_cpg::{CodePropertyGraph, NodeType};
 pub struct DeserializationRule;
 
 impl Rule for DeserializationRule {
-    fn name(&self) -> &str { "CWE-502: Insecure Deserialization" }
-    fn description(&self) -> &str { "Detects untrusted data being deserialized without validation, leading to potential RCE." }
+    fn metadata(&self) -> crate::RuleMetadata {
+        crate::RuleMetadata {
+            id: "CWE-502".to_string(),
+            description: "Detects untrusted data being deserialized without validation, leading to potential RCE.".to_string(),
+            cwe_ids: vec!["CWE-502".to_string()],
+            severity: Severity::Critical,
+        }
+    }
 
-    fn run(&self, cpg: &CodePropertyGraph) -> Result<Vec<Finding>> {
+    fn check(&self, cpg: &CodePropertyGraph) -> Result<Vec<Finding>> {
         let mut findings = Vec::new();
         
-        // 1. Identify Sinks (Deserialization methods)
         let sinks: Vec<_> = cpg.nodes.iter()
             .filter(|n| {
                 n.node_type == NodeType::Call && 
@@ -23,13 +28,15 @@ impl Rule for DeserializationRule {
         for sink in sinks {
             tracing::info!("CWE-502 Rule: Verifying safety of deserialization sink: {}", sink.name);
             
-            // 2. Perform deep path analysis to find untrusted sources
-            // ... (Exhaustive taint checking and presence of allow-lists)
-            
             findings.push(Finding {
-                line: sink.line,
+                rule_id: "CWE-502".to_string(),
                 message: format!("Dangerous Deserialization: Unvalidated input flows into '{}'. Potential Remote Code Execution.", sink.name),
                 severity: Severity::Critical,
+                line: sink.line_start,
+                column: sink.col_start,
+                file: Some(sink.name.clone()),
+                cwe_id: Some("CWE-502".to_string()),
+                confidence: 0.8,
             });
         }
 

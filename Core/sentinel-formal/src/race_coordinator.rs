@@ -92,7 +92,9 @@ impl SolverRaceCoordinator {
 
         // Wait for the first finisher or global timeout
         let final_result = tokio::select! {
-            Some(res) => res,
+            res = rx.recv() => {
+                res.ok_or_else(|| anyhow!("Channel closed"))?
+            }
             _ = tokio::time::sleep(self.timeout) => {
                 return Err(anyhow!("Global Proof Timeout: All solvers failed to converge within {:?}", self.timeout));
             }
@@ -101,8 +103,14 @@ impl SolverRaceCoordinator {
         info!("SSRC: [Winner] {:?} solved {} in {:?}", final_result.solver, query_id, final_result.duration);
         
         // Terminate all other losing solvers to reclaim CPU/RAM
-        for (solver, abort_tx) in active_tasks.into_iter() {
-            if solver != final_result.solver {
+        let mut losers = Vec::new();
+        for entry in active_tasks.iter() {
+            if *entry.key() != final_result.solver {
+                losers.push(entry.key().clone());
+            }
+        }
+        for solver in losers {
+            if let Some((_, abort_tx)) = active_tasks.remove(&solver) {
                 let _ = abort_tx.send(());
             }
         }
@@ -129,10 +137,15 @@ impl SolverRaceCoordinator {
         let total = self.current_results.len();
         format!("SSRC: Processed {} Proofs. Peak Memory: 1.2GB, Average Proof Time: 142ms", total)
     }
+}
 
 use crate::solver::{Z3Solver, SmtResult};
 
-async fn execute_real_solver(solver_type: &SolverType, query: &str) -> String {
+async fn simulate_solver_execution(solver_type: &SolverType, query: &str) -> String {
+    execute_real_solver(solver_type, query).await
+}
+
+async fn execute_real_solver(_solver_type: &SolverType, query: &str) -> String {
     let solver = Z3Solver::new();
     
     // In a multi-solver mesh, we'd spawn farklı binaries
@@ -142,6 +155,7 @@ async fn execute_real_solver(solver_type: &SolverType, query: &str) -> String {
             SmtResult::Satisfiable(_) => "sat".to_string(),
             SmtResult::Unsatisfiable => "unsat".to_string(),
             SmtResult::Unknown => "unknown".to_string(),
+            SmtResult::Timeout => "timeout".to_string(),
             SmtResult::Error(e) => format!("error: {}", e),
         },
         Err(e) => format!("failure: {}", e),

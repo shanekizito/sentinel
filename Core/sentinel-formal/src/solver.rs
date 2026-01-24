@@ -1,11 +1,12 @@
 use anyhow::{Result, anyhow, Context};
-use tracing::{info, warn, error, span, Level};
+use tracing::{info, warn, span, Level};
 use std::process::{Command, Stdio, Child};
 use std::io::{Write, BufRead, BufReader};
 use std::time::{Duration, Instant};
 use std::sync::Arc;
 use parking_lot::Mutex;
-use crossbeam::channel::{bounded, Sender, Receiver};
+// Crossbeam removed as unused
+
 
 // =============================================================================
 // SECTION 1: SMT RESULT

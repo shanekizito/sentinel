@@ -24,14 +24,14 @@ impl StressGenerator {
             .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta})")
             .unwrap());
 
-        # 1. Generate Logical Topology (DAG)
-        # We assign each file a 'layer' so imports only go downwards (preventing cycles generally, though cycles are good for stress)
-        # For this bench, we want mostly DAG but some cycles.
+// 1. Generate Logical Topology (DAG)
+        // We assign each file a "layer" so imports only go downwards (preventing cycles generally, though cycles are good for stress)
+        // For this bench, we want mostly DAG but some cycles.
         
-        # Parallel Generation
+        // Parallel Generation
         (0..file_count).into_par_iter().for_each(|i| {
             let mut rng = rand::thread_rng();
-            let lang_type = rng.gen_range(0..3); # 0=Rust, 1=Py, 2=TS
+            let lang_type = rng.gen_range(0..3); // 0=Rust, 1=Py, 2=TS
             
             let (filename, content) = match lang_type {
                 0 => generate_rust_module(i, file_count),
@@ -56,7 +56,7 @@ fn generate_rust_module(id: usize, total: usize) -> (String, String) {
     let name = format!("mod_{:06}", id);
     let mut code = String::new();
     
-    # Imports
+    // Imports
     code.push_str("// Synthetic Rust Module\n");
     let num_imports = rng.gen_range(2..10);
     for _ in 0..num_imports {
@@ -66,13 +66,13 @@ fn generate_rust_module(id: usize, total: usize) -> (String, String) {
         }
     }
     
-    # Complex Functions
+    // Complex Functions
     code.push_str("\npub struct DataPacket {\n    pub id: u64,\n    pub payload: Vec<u8>,\n}\n\n");
     
     let num_fns = rng.gen_range(5..20);
     for f in 0..num_fns {
         code.push_str(&format!("\npub fn logic_{}(input: DataPacket) -> Result<u64, String> {{\n", f));
-        # Generate complexity (Control Flow)
+        // Generate complexity (Control Flow)
         code.push_str("    let mut x = input.id;\n");
         code.push_str("    for i in 0..100 {\n");
         code.push_str("        if x % 2 == 0 { x = x.wrapping_div(2); }\n");

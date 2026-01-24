@@ -8,3 +8,12 @@ anyhow.workspace = true
 petgraph.workspace = true
 serde.workspace = true
 tracing.workspace = true
+memmap2 = "0.7"
+rayon = "1.8"
+crossbeam = "0.8"
+walkdir = "2.4"
+num_cpus = "1.16"
+once_cell = "1.19"
+tree-sitter = "0.20"
+sentinel-parser = { path = "../sentinel-parser" }
+libc = "0.2"

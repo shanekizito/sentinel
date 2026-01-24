@@ -1,11 +1,11 @@
 use anyhow::{Result, anyhow};
 use rayon::prelude::*;
 use crossbeam::channel::{bounded, Sender, Receiver};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 use dashmap::DashMap;
-use tracing::{info, warn, span, Level};
+use tracing::{info, span, Level};
 use crate::{CodeParser, SupportedLanguage};
 
 // =============================================================================
@@ -43,8 +43,9 @@ impl OmegaIndustrialPipeline {
 
         // Spawn producer workers using rayon
         let tx_clone = tx.clone();
+        let files = file_paths.to_vec();
         let producer = thread::spawn(move || {
-            file_paths.par_iter().for_each(|path| {
+            files.par_iter().for_each(|path| {
                 if let Ok(source) = std::fs::read_to_string(path) {
                     if let Ok(mut parser) = CodeParser::new(lang.clone()) {
                         if let Ok(tree) = parser.parse(&source) {

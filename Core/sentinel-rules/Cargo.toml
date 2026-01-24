@@ -8,3 +8,6 @@ anyhow.workspace = true
 serde.workspace = true
 tracing.workspace = true
 sentinel-cpg = { path = "../sentinel-cpg" }
+rayon = "1.8"
+aho-corasick = "1.1"
+serde_json = { workspace = true }

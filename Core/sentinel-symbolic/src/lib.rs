@@ -2,6 +2,7 @@ pub mod walker;
 
 use anyhow::Result;
 use sentinel_cpg::{CodePropertyGraph, NodeType};
+use tracing::info;
 
 pub struct SymbolicExecutor {
     pub max_depth: usize,
@@ -33,7 +34,7 @@ impl SymbolicExecutor {
         Ok(paths)
     }
 
-    fn explore_backwards(&self, node_id: usize, cpg: &CodePropertyGraph, visited: &mut std::collections::HashSet<usize>, current_path: &mut Vec<usize>, results: &mut Vec<String>) {
+    fn explore_backwards(&self, node_id: u64, cpg: &CodePropertyGraph, visited: &mut std::collections::HashSet<u64>, current_path: &mut Vec<u64>, results: &mut Vec<String>) {
         if visited.len() > self.max_depth || visited.contains(&node_id) {
             return;
         }

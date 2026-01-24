@@ -1,14 +1,13 @@
-use anyhow::{Result, anyhow, Context};
+use anyhow::{Result, anyhow};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::fs::{self, File};
-use std::io::{Write, BufWriter};
+use std::fs;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use rayon::prelude::*;
-use crossbeam::channel::{bounded, Sender};
-use tracing::{info, warn, error, span, Level};
-use memmap2::MmapMut;
+use crossbeam::channel::bounded;
+use tracing::{info, error, span, Level};
 use crate::graph::SovereignGraph;
-use crate::{Node, NodeType, Edge, EdgeType};
+use crate::{Node, NodeType};
 use sentinel_parser::SupportedLanguage;
 
 // =============================================================================
@@ -24,6 +23,7 @@ pub struct OmegaDataIngestor {
     pub worker_count: usize,
     total_nodes: AtomicUsize,
     total_files: AtomicUsize,
+    next_id: AtomicUsize,
 }
 
 impl OmegaDataIngestor {
@@ -35,6 +35,7 @@ impl OmegaDataIngestor {
             worker_count: num_cpus::get(),
             total_nodes: AtomicUsize::new(0),
             total_files: AtomicUsize::new(0),
+            next_id: AtomicUsize::new(1),
         }
     }
 
@@ -68,7 +69,7 @@ impl OmegaDataIngestor {
                 if current_count >= shard_size {
                     let filename = format!("logic_shard_{:04}.bin", shard_id);
                     let path = output_dir.join(&filename);
-                    if let Err(e) = current_graph.save_to_binary_v6(&path) {
+                    if let Err(e) = current_graph.save_to_binary_v5(&path) {
                         error!("Failed to write shard {}: {}", shard_id, e);
                     } else {
                         info!("Omega Ingestor: Flushed shard {} ({} nodes)", shard_id, current_count);
@@ -83,7 +84,7 @@ impl OmegaDataIngestor {
             if current_count > 0 {
                 let filename = format!("logic_shard_{:04}.bin", shard_id);
                 let path = output_dir.join(&filename);
-                let _ = current_graph.save_to_binary_v6(&path);
+                let _ = current_graph.save_to_binary_v5(&path);
                 shard_id += 1;
             }
             
@@ -113,6 +114,31 @@ impl OmegaDataIngestor {
         })
     }
 
+    /// Full ingestion into an in-memory CodePropertyGraph for fast scanning.
+    pub fn ingest_to_memory(&self) -> Result<crate::CodePropertyGraph> {
+        let _span = span!(Level::INFO, "OmegaMemoryIngestion").entered();
+        info!("Omega Ingestor: Starting in-memory ingestion from {:?}", self.source_root);
+        
+        let files = self.scan_directory_parallel(&self.source_root)?;
+        let final_graph = SovereignGraph::new();
+
+        let sub_graphs: Vec<SovereignGraph> = files.par_iter()
+            .filter_map(|path| self.process_file_parallel(path))
+            .collect();
+
+        for sg in sub_graphs {
+            final_graph.merge(&sg);
+        }
+
+        let nodes_read = final_graph.nodes.read().map_err(|_| anyhow!("Node lock poisoned"))?;
+        let edges_read = final_graph.edges.read().map_err(|_| anyhow!("Edge lock poisoned"))?;
+
+        Ok(crate::CodePropertyGraph {
+            nodes: nodes_read.values().cloned().collect(),
+            edges: edges_read.clone(),
+        })
+    }
+
     fn scan_directory_parallel(&self, dir: &Path) -> Result<Vec<PathBuf>> {
         let entries: Vec<PathBuf> = walkdir::WalkDir::new(dir)
             .into_iter()
@@ -129,7 +155,7 @@ impl OmegaDataIngestor {
     }
 
     fn detect_language(&self, path: &Path) -> Option<SupportedLanguage> {
-        match path.extension().and_then(|s| s.to_str()) {
+        match path.extension().and_then(|s: &std::ffi::OsStr| s.to_str()) {
             Some("rs") => Some(SupportedLanguage::Rust),
             Some("c") | Some("h") => Some(SupportedLanguage::C),
             Some("cpp") | Some("hpp") | Some("cc") | Some("cxx") => Some(SupportedLanguage::Cpp),
@@ -150,33 +176,60 @@ impl OmegaDataIngestor {
     }
 
     fn process_file_parallel(&self, path: &Path) -> Option<SovereignGraph> {
-        let lang = self.detect_language(path)?;
+        let _lang = self.detect_language(path)?;
         let code = fs::read_to_string(path).ok()?;
         
-        let mut graph = SovereignGraph::new();
+        let graph = SovereignGraph::new();
         
         // Create file node
         let file_node = Node {
-            id: 0,
+            id: self.next_id.fetch_add(1, Ordering::Relaxed) as u64,
             node_type: NodeType::File,
             name: path.file_name()?.to_string_lossy().to_string(),
             code: None,
-            line_start: 0, line_end: code.lines().count() as u32,
-            col_start: 0, col_end: 0,
+            line_start: 0, 
+            line_end: code.lines().count(),
+            col_start: 0, 
+            col_end: 0,
+            features: vec![0.0; 64],
+            metadata: HashMap::new(),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_secs(),
         };
         graph.add_node(file_node).ok()?;
         
         // Parse and extract symbols (simplified)
         let lines: Vec<&str> = code.lines().collect();
         for (i, line) in lines.iter().enumerate() {
-            if line.contains("fn ") || line.contains("def ") || line.contains("function ") {
+            let trimmed = line.trim();
+            if trimmed.is_empty() || trimmed.starts_with("//") || trimmed.starts_with("/*") {
+                continue;
+            }
+
+            if line.contains("fn ") || line.contains("def ") || line.contains("function ") || line.contains("=>") || line.contains("require(") || line.contains("const ") || line.contains("let ") {
+                let node_type = if line.contains("=>") || line.contains("function ") || line.contains("fn ") || line.contains("def ") {
+                    NodeType::Function
+                } else {
+                    NodeType::Variable
+                };
+
                 let func_node = Node {
-                    id: 0,
-                    node_type: NodeType::Function,
-                    name: format!("func_{}_{}", path.file_stem()?.to_string_lossy(), i),
+                    id: self.next_id.fetch_add(1, Ordering::Relaxed) as u64,
+                    node_type: node_type.clone(),
+                    name: format!("{:?}_{}_{}", node_type, path.file_stem()?.to_string_lossy(), i),
                     code: Some(line.to_string()),
-                    line_start: i as u32, line_end: i as u32,
-                    col_start: 0, col_end: line.len() as u32,
+                    line_start: i, 
+                    line_end: i,
+                    col_start: 0, 
+                    col_end: line.len(),
+                    features: vec![0.0; 64],
+                    metadata: HashMap::new(),
+                    timestamp: std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap()
+                        .as_secs(),
                 };
                 graph.add_node(func_node).ok()?;
             }

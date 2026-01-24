@@ -1,6 +1,6 @@
 use anyhow::Result;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub struct SymbolTable {
     symbols: HashMap<String, PathBuf>,
@@ -21,7 +21,7 @@ impl MultiPassResolver {
     /// Iterates through the entire project to map all class and function names.
     pub fn discovery_pass(&mut self, files: &[(PathBuf, String)]) -> Result<()> {
         tracing::info!("Analysis Pass 1: Global Symbol Discovery in progress...");
-        for (path, source) in files {
+        for (path, _source) in files {
             // In a real implementation, we would partial-parse here to find definitions
             tracing::debug!("Indexing symbols in {:?}", path);
         }

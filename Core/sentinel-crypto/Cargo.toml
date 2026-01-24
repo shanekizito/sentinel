@@ -6,4 +6,7 @@ edition.workspace = true
 [dependencies]
 anyhow.workspace = true
 tracing.workspace = true
-# Placeholder for ed25519-dalek or similar
+sha3 = "0.10"
+rand = "0.8"
+rand_chacha = "0.3"
+serde = { workspace = true, features = ["derive"] }

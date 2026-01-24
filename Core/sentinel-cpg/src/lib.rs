@@ -6,7 +6,9 @@ pub mod ingest;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+use std::collections::HashMap;
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum NodeType {
     File,
     Namespace,
@@ -15,6 +17,8 @@ pub enum NodeType {
     Variable,
     Literal,
     Call,
+    MemberAccess,
+    Allocation,
     ControlFlow, // If, Loop, etc.
 }
 
@@ -28,9 +32,29 @@ pub struct Node {
     pub line_end: usize,
     pub col_start: usize,
     pub col_end: usize,
+    pub features: Vec<f32>,
+    pub metadata: HashMap<String, String>,
+    pub timestamp: u64,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+impl Node {
+    pub fn node_type_id(&self) -> u64 {
+        match self.node_type {
+            NodeType::File => 1,
+            NodeType::Namespace => 2,
+            NodeType::Class => 3,
+            NodeType::Function => 4,
+            NodeType::Variable => 5,
+            NodeType::Literal => 6,
+            NodeType::Call => 7,
+            NodeType::MemberAccess => 8,
+            NodeType::Allocation => 9,
+            NodeType::ControlFlow => 10,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum EdgeType {
     Contains,      // File -> Function
     Calls,         // Function -> Function
@@ -46,9 +70,38 @@ pub struct Edge {
     pub edge_type: EdgeType,
 }
 
+impl Edge {
+    pub fn edge_type_id(&self) -> u64 {
+        match self.edge_type {
+            EdgeType::Contains => 1,
+            EdgeType::Calls => 2,
+            EdgeType::DataFlow => 3,
+            EdgeType::ControlFlow => 4,
+            EdgeType::Inherits => 5,
+        }
+    }
+}
+
 pub struct CodePropertyGraph {
     pub nodes: Vec<Node>,
     pub edges: Vec<Edge>,
+}
+
+impl CodePropertyGraph {
+    pub fn new() -> Self {
+        Self {
+            nodes: Vec::new(),
+            edges: Vec::new(),
+        }
+    }
+
+    pub fn add_node(&mut self, node: Node) {
+        self.nodes.push(node);
+    }
+
+    pub fn add_edge(&mut self, from: u64, to: u64, edge_type: EdgeType) {
+        self.edges.push(Edge { from, to, edge_type });
+    }
 }
 
 pub struct CpgBuilder {
@@ -98,6 +151,12 @@ impl CpgBuilder {
             line_end: ts_node.end_position().row,
             col_start: ts_node.start_position().column,
             col_end: ts_node.end_position().column,
+            features: vec![0.0; 64],
+            metadata: HashMap::new(),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_secs(),
         };
 
         self.cpg.add_node(node);
