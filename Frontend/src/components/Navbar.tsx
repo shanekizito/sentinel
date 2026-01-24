@@ -12,6 +12,7 @@ const Navbar = () => {
     { label: "Security", href: "/security" },
     { label: "Automation", href: "/automation" },
     { label: "Docs", href: "/docs" },
+    { label: "Live Engine", href: "/engine" },
     { label: "Contact", href: "/contact" },
   ];
 

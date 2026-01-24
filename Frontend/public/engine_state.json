@@ -1,0 +1,1 @@
+{"confidence":"0.9992","file":"Variable_vulnerabilities_5","file_index":93,"memory":"42.0 MB","nodes":145,"phase":"Cycle #151 | Neuro-Symbolic Loop","progress":64.13793182373047,"scan_mode":"Pure Rust (SoV Phase 1)","status":"Rust Sovereign Analysis Active","timestamp":"2026-01-23T19:56:21.621297600+03:00","total_files":145,"vulns":8}

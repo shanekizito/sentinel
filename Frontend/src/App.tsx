@@ -8,6 +8,7 @@ import Security from "./pages/Security";
 import Automation from "./pages/Automation";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import Docs from "./pages/Docs";
+import Engine from "./pages/Engine";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
@@ -23,6 +24,7 @@ const App = () => (
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/engine" element={<Engine />} />
           <Route path="/security" element={<Security />} />
           <Route path="/automation" element={<Automation />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
